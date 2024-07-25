@@ -8,6 +8,12 @@ group = 'com.elice'
 version = '0.0.1-SNAPSHOT'
 
 dependencies {
+    // h2
+    runtimeOnly 'com.h2database:h2'
+
+    // file upload module
+    implementation project(':module-file')
+    implementation project(':module-common')
 
 }
 

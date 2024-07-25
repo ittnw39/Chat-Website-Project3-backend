@@ -8,6 +8,8 @@ group = 'com.elice'
 version = '0.0.1-SNAPSHOT'
 
 dependencies {
+    // implement common module
+    implementation project(':module-common')
 
 }
 
