@@ -1,0 +1,5 @@
+rootProject.name = 'multi-module'
+
+include 'module-chat'
+include 'module-file'
+include 'module-user'
