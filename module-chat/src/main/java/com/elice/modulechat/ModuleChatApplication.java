@@ -1,6 +1,5 @@
 package com.elice.modulechat;
 
-import com.elice.moduleuser.UserComponent;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
