@@ -38,6 +38,13 @@ subprojects { // 모든 하위 모듈들에 이 설정을 적용합니다.
 		implementation("org.springframework.boot:spring-boot-starter-web")
 		implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 		implementation ("mysql:mysql-connector-java:8.0.33")
+
+		// for h2 database in-memory mode
+		implementation 'org.springframework.boot:spring-boot-starter-jdbc' // Jdbc, Driver
+		implementation 'com.h2database:h2' // h2 : implementation
+
+		// Dev tool library -> for Hot Reload
+		implementation 'org.springframework.boot:spring-boot-devtools'
 	}
 
 	test {
