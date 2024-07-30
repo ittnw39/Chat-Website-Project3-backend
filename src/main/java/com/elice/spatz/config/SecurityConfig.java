@@ -22,13 +22,14 @@ public class SecurityConfig {
 
     // 인증 과정이 필요하여
     // 인증 없이 요청한 경우 로그인 페이지로 리다이렉션 합니다.
-    String[] urlsToBeAuthenticated = {"/logout"};
+    String[] urlsToBeAuthenticated = {"/logout", "/test"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(urlsToBeAuthenticated).authenticated()
                         .anyRequest().permitAll()
                 )
                 .headers(headers -> headers

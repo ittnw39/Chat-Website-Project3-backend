@@ -2,13 +2,15 @@ package com.elice.spatz.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name="users")
-class Users {
+@NoArgsConstructor
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
