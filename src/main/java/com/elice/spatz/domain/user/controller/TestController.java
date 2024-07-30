@@ -18,8 +18,12 @@ public class TestController {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
         String rawPassword = "1234";
-        String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        return encodedPassword;
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "login success!";
     }
 }
