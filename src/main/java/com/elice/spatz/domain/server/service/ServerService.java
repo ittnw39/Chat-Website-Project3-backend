@@ -3,6 +3,8 @@ package com.elice.spatz.domain.server.service;
 import com.elice.spatz.domain.server.dto.ServerDto;
 import com.elice.spatz.domain.server.entity.Servers;
 import com.elice.spatz.domain.server.repository.ServerRepository;
+import com.elice.spatz.exception.errorCode.ServerErrorCode;
+import com.elice.spatz.exception.exception.ServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,8 @@ public class ServerService {
     @Transactional(readOnly = true)
     public ServerDto getServer(Long id)
     {
-        Servers server = serverRepository.findById(id).orElseThrow(()->new RuntimeException("없는 엔티티"));
+        Servers server = serverRepository.findById(id).orElseThrow(()->
+                new ServerException(ServerErrorCode.SERVER_NOT_FOUND));
 
         return new ServerDto(server.getName());
     }
@@ -42,7 +45,8 @@ public class ServerService {
     @Transactional
     public void patchServer(Long id, ServerDto serverDto)
     {
-        Servers server = serverRepository.findById(id).orElseThrow(()->new RuntimeException("없는 엔티티"));
+        Servers server = serverRepository.findById(id).orElseThrow(()->
+                new ServerException(ServerErrorCode.SERVER_NOT_FOUND));
         server.setName(serverDto.getName());
 
         serverRepository.save(server);
@@ -53,8 +57,8 @@ public class ServerService {
     @Transactional
     public void deleteServer(Long id)
     {
-        serverRepository.findById(id).orElseThrow(()->new RuntimeException("없는 엔티티"));
-
+        serverRepository.findById(id).orElseThrow(()->
+                new ServerException(ServerErrorCode.SERVER_NOT_FOUND));
         serverRepository.deleteById(id);
     }
 
