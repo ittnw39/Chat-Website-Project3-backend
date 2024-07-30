@@ -18,7 +18,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     // 인증과정 없이 요청 가능한 url
-    String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**"};
+    String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**", "/files/**"};
 
     // 인증 과정이 필요하여
     // 인증 없이 요청한 경우 로그인 페이지로 리다이렉션 합니다.
@@ -29,6 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/files/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .headers(headers -> headers
