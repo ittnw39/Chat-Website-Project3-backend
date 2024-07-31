@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class BlockCreateDto {
     private long blockerId;
     private long blockedId;
-    private boolean isBlocked;
+    private boolean blockStatus;
 }

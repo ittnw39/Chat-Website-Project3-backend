@@ -31,7 +31,7 @@ public class Report extends BaseEntity {
     private String reportReason;
 
     @Column(nullable = false, length = 1000)
-    private String reportUrl;
+    private String reportURL;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

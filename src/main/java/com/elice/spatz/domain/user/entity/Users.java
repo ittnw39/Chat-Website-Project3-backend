@@ -7,12 +7,14 @@ import com.elice.spatz.domain.userfeature.model.entity.Report;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name="users")
 @NoArgsConstructor
 public class Users {

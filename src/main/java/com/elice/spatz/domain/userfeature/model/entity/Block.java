@@ -28,5 +28,5 @@ public class Block extends BaseEntity {
     private Users blocked;
 
     @Column(nullable = false)
-    private boolean isBlocked;
+    private boolean blockStatus;
 }

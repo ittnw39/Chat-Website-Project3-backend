@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class FriendRequestCreateDto {
-
     private long requesterId;
     private long recipientId;
-    private Status status;
+    private Status requestStatus;
 }

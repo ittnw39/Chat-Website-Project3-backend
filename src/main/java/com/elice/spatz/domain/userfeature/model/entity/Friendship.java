@@ -28,5 +28,5 @@ public class Friendship extends BaseEntity {
     private Users friend;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean friendStatus;
 }

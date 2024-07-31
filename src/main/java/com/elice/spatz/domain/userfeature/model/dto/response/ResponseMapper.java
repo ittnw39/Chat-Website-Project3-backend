@@ -15,20 +15,19 @@ public interface ResponseMapper {
     // 차단
     @Mapping(source = "blocker.id", target = "blockerId")
     @Mapping(source = "blocked.id", target = "blockedId")
-    BlockCreateDto blockToBlockCreateDto(Block entity);
+    @Mapping(source = "blockStatus", target = "blockStatus")
+    BlockDto blockToBlockDto(Block entity);
 
     // 친구 요청
     @Mapping(source = "requester.id", target = "requesterId")
     @Mapping(source = "recipient.id", target = "recipientId")
-    FriendRequestCreateDto friendRequestToFriendRequestDto(FriendRequest entity);
+    FriendRequestDto friendRequestToFriendRequestDto(FriendRequest entity);
 
     // 신고 요청
     @Mapping(source = "reporter.id", target = "reporterId")
     @Mapping(source = "reported.id", target = "reportedId")
-    ReportCreateDto reportToReportCreateDto(Report entity);
-
-    // 신고 수정
-    @Mapping(source = "reporter.id", target = "reporterId")
-    @Mapping(source = "reported.id", target = "reportedId")
-    ReportUpdateDto reportToReportUpdateDto(Report entity);
+    @Mapping(source = "reportReason", target = "reportReason")
+    @Mapping(source = "reportURL", target = "reportURL")
+    @Mapping(source = "reportStatus", target = "reportStatus")
+    ReportDto reportToReportDto(Report entity);
 }
