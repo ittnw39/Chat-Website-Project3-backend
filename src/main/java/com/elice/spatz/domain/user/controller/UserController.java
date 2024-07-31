@@ -36,4 +36,9 @@ public class UserController {
         return ResponseEntity.status(code)
                 .body(new UserRegisterResultDto(result, null));
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login!";
+    }
 }
