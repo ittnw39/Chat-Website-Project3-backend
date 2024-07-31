@@ -37,8 +37,14 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// mapstruct
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
