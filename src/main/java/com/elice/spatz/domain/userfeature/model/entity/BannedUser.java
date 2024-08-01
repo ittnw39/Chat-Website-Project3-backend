@@ -16,11 +16,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "bannedUser")
-public class BannedUser extends BaseEntity {
+public class BannedUser {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 기본 키
+
     @OneToOne
-    @JoinColumn(name = "userId")
-    private Users user;
+    @JoinColumn(name = "userId", nullable = false)
+    private Users user; // Users 엔티티의 ID를 참조하는 필드
 
     @Column(nullable = false)
     private LocalDateTime bannedStart;

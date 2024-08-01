@@ -1,9 +1,6 @@
 package com.elice.spatz.domain.user.entity;
 
-import com.elice.spatz.domain.userfeature.model.entity.Block;
-import com.elice.spatz.domain.userfeature.model.entity.FriendRequest;
-import com.elice.spatz.domain.userfeature.model.entity.Friendship;
-import com.elice.spatz.domain.userfeature.model.entity.Report;
+import com.elice.spatz.domain.userfeature.model.entity.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,8 +51,14 @@ public class Users {
     // 신고
     @OneToMany(mappedBy = "reported", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Report> reports;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private ReportCount reportCount;
 
     // 차단
-    @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Block> blockUsers;
+
+    // 정지
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private BannedUser bannedUser;
 }
