@@ -1,21 +1,23 @@
 package com.elice.spatz.domain.user.controller;
 
 import com.elice.spatz.constants.ApplicationConstants;
-import com.elice.spatz.domain.user.dto.LoginRequestDto;
-import com.elice.spatz.domain.user.dto.LoginResponseDto;
-import com.elice.spatz.domain.user.dto.UserRegisterDto;
-import com.elice.spatz.domain.user.dto.UserRegisterResultDto;
+import com.elice.spatz.domain.user.dto.*;
 import com.elice.spatz.domain.user.service.UserService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -77,4 +79,31 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).header(ApplicationConstants.JWT_HEADER,jwt)
                 .body(new LoginResponseDto(HttpStatus.OK.getReasonPhrase(), jwt));
     }
+
+    @GetMapping("/jwtTokenCheck")
+    public ResponseEntity<JwtCheckResultDto> jwtTokenCheck(HttpServletRequest request) {
+        String jwt = request.getHeader(ApplicationConstants.JWT_HEADER);
+        if(jwt != null) {
+            try {
+                if (env != null) {
+                    String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
+                    SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+                    if (secretKey != null) {
+                        Claims claims = Jwts.parser().verifyWith(secretKey)
+                                .build().parseSignedClaims(jwt).getPayload();
+                    }
+                }
+            } catch (Exception e) {
+                // 유효하지 않은 토큰의 경우 false 반환
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new JwtCheckResultDto(false));
+            }
+        }
+
+        // 유효한 토큰의 경우 true 반환
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new JwtCheckResultDto(true));
+
+    }
+
 }

@@ -20,7 +20,7 @@ public class CustomBasicAuthenticationEntryPoint implements AuthenticationEntryP
         String message = (authException != null && authException.getMessage() != null) ? authException.getMessage() // 더욱 상세한 예외 관련 내용이 담겨있음.
                 : "Unauthorized";
         String path = request.getRequestURI();
-        response.setHeader("spatz-error-reason", "Authentication failed");
+        response.setHeader("spatz-authentication-failed-reason", "Authentication failed");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=UTF-8");
         // 반환되는 JSON

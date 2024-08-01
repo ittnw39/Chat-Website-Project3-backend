@@ -76,12 +76,10 @@ public class SecurityConfig {
                 // X-Frame-Options 헤더설정 for h2-database
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-//                .formLogin(form -> form
-//                        .loginPage("/login") // 사용자 정의 로그인 페이지 설정
-//                        .permitAll() // 모든 사용자에게 로그인 페이지 접근 허용
-//                ) // 기본 로그인 페이지 사용
                 .httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()))
-                .logout(withDefaults()); // 로그아웃도 허용
+                .exceptionHandling(ehc -> ehc
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())) // 403 Unauthorized 관련 예외 전역 처리
+                .logout(withDefaults());
 
         return http.build();
     }

@@ -54,6 +54,6 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     // JWT Token 검증작업이 수행되면 안 된다.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return request.getServletPath().equals("/login");
+        return request.getServletPath().equals("/apiLogin") && request.getServletPath().equals("/jwtTokenCheck");
     }
 }
