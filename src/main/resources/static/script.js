@@ -24,6 +24,21 @@ function uploadFile() {
         alert('Failed to upload file.');
     });
 }
+function loadFileList() {
+    fetch(`${apiUrl}/list`, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(fileList => {
+        fileList.forEach(fileKey => {
+            const fileName = fileKey.substring(fileKey.indexOf('_') + 1);
+            addFileToList(fileName, fileKey);
+        });
+    })
+    .catch(error => {
+        console.error('Error loading file list:', error);
+    });
+}
 
 function addFileToList(fileName, fileKey) {
     const fileList = document.getElementById('fileList');
@@ -68,9 +83,47 @@ function downloadFile(fileKey, fileName) {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
+
+        // 다운로드 목록에 파일 추가
+        addDownloadedFileToList(fileName);
+        saveDownloadedFile(fileName); // 파일 목록을 로컬 저장소에 저장
     })
     .catch(error => {
         console.error('Error downloading file:', error);
         alert('Failed to download file.');
     });
+}
+
+function addDownloadedFileToList(fileName) {
+    const downloadedFileList = document.getElementById('downloadedFileList');
+
+    const fileItem = document.createElement('div');
+    fileItem.classList.add('file-item');
+
+    const fileIcon = document.createElement('span');
+    fileIcon.classList.add('icon');
+    fileIcon.textContent = '📁'; // 파일 아이콘 이모티콘
+
+    const fileNameSpan = document.createElement('span');
+    fileNameSpan.textContent = fileName;
+
+    fileItem.appendChild(fileIcon);
+    fileItem.appendChild(fileNameSpan);
+
+    downloadedFileList.appendChild(fileItem);
+}
+
+function loadDownloadedFileList() {
+    const downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles')) || [];
+    downloadedFiles.forEach(fileName => {
+        addDownloadedFileToList(fileName);
+    });
+}
+
+function saveDownloadedFile(fileName) {
+    const downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles')) || [];
+    if (!downloadedFiles.includes(fileName)) {
+        downloadedFiles.push(fileName);
+        localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
+    }
 }
