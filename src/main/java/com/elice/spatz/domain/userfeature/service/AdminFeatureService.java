@@ -1,4 +1,4 @@
 package com.elice.spatz.domain.userfeature.service;
 
-public class AdminReportService {
+public class AdminFeatureService {
 }
