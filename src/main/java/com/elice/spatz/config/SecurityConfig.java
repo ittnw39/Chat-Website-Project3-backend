@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -42,6 +43,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 개발 단계에서는 오로지 HTTP 만을 이용해서 통신하도록 설정
+                .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 // CSRF 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
                 // JWT 토큰 시스템을 사용하기 위해 jsessionid 발급을 중단.
@@ -73,10 +76,11 @@ public class SecurityConfig {
                 // X-Frame-Options 헤더설정 for h2-database
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                .formLogin(form -> form
-                        .loginPage("/login") // 사용자 정의 로그인 페이지 설정
-                        .permitAll() // 모든 사용자에게 로그인 페이지 접근 허용
-                ) // 기본 로그인 페이지 사용
+//                .formLogin(form -> form
+//                        .loginPage("/login") // 사용자 정의 로그인 페이지 설정
+//                        .permitAll() // 모든 사용자에게 로그인 페이지 접근 허용
+//                ) // 기본 로그인 페이지 사용
+                .httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()))
                 .logout(withDefaults()); // 로그아웃도 허용
 
         return http.build();
@@ -87,13 +91,15 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    // apiLogin이라는 사용자 정의 인증 로직을 위해서는, 요청이 들어올 때 authentication process를 시작하도록 하여야 한다.
+    // 그렇게 하기 위해서는 Authentication Manager를 구현해야 함
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
                                                        PasswordEncoder passwordEncoder) {
         CustomAuthenticationProvider authenticationProvider =
                 new CustomAuthenticationProvider(userDetailsService, passwordEncoder);
         ProviderManager providerManager = new ProviderManager(authenticationProvider);
-        providerManager.setEraseCredentialsAfterAuthentication(false);
+        providerManager.setEraseCredentialsAfterAuthentication(false); // 인증과정에서 authentication객체의 비밀번호를 지우지 않고 넘겨주어서 사용자 정의 인증로직이 제대로 동작하게 함.
         return  providerManager;
     }
 

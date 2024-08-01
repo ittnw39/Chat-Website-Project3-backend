@@ -31,7 +31,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
                 String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY
                         , ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
                 SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-                String jwt = Jwts.builder().issuer("Eazy Bank").subject("JWT Token")
+                String jwt = Jwts.builder().issuer("Spatz").subject("JWT Token")
                         .claim("username", authentication.getName())
                         .claim("authorities", authentication.getAuthorities().stream().map(
                                 GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
