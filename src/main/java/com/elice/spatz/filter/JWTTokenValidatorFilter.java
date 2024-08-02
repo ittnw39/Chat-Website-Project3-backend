@@ -15,6 +15,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,6 +35,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
+    private boolean isExecutedBefore = false;
+
     private final AccessTokenProvider accessTokenProvider;
     private final RefreshTokenProvider refreshTokenProvider;
 
@@ -51,11 +54,12 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
         // 만약 클라이언트가 JWT 토큰을 보내지 않았다면 필터링을 수행하지 않는다.
         if(jwt != null) {
             try {
+
                 // 토큰 유효성 검사 이후 페이로드 부분을 추출
                 Claims claims = Jwts.parser()
                         .verifyWith(secretKey)
-                        .build()// 실질적으로 access JWT 토큰의 변조 여부 + 유효기간 만료 여부가 검사되는 부분이다.
-                        .parseSignedClaims(jwt)
+                        .build()
+                        .parseSignedClaims(jwt) // 실질적으로 access JWT 토큰의 변조 여부 + 유효기간 만료 여부가 검사되는 부분이다.
                         .getPayload();
 
                 String username = String.valueOf(claims.get("username"));
@@ -83,6 +87,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // 클라이언트가 보낸 Refresh-Token 을 바탕으로 Access Token 을 재 발급하여 response 의 Header 에 넣는다.
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, ExpiredJwtException exception) {
 
         try {
@@ -122,7 +127,8 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
         }
     }
 
-
+    // 클라이언트 요청으로부터, Access Token 과 Refresh-Token 을 String 형태로 추출하는 메소드.
+    // Access Token 과 Refresh-Token 중 어느 것을 추출할 것인지는 두 번째 인자로 전달하여 명시
     private String parseBearerToken(HttpServletRequest request, String headerName) {
         return Optional.ofNullable(request.getHeader(headerName))
                 .filter(headerValue -> headerValue.substring(0, 6).equalsIgnoreCase("Bearer"))
