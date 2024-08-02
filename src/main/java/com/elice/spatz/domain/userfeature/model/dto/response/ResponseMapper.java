@@ -1,8 +1,9 @@
 package com.elice.spatz.domain.userfeature.model.dto.response;
 
-import com.elice.spatz.domain.userfeature.model.dto.request.*;
+import com.elice.spatz.domain.user.entity.Users;
 import com.elice.spatz.domain.userfeature.model.entity.Block;
 import com.elice.spatz.domain.userfeature.model.entity.FriendRequest;
+import com.elice.spatz.domain.userfeature.model.entity.Friendship;
 import com.elice.spatz.domain.userfeature.model.entity.Report;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,12 @@ public interface ResponseMapper {
     @Mapping(source = "requester.id", target = "requesterId")
     @Mapping(source = "recipient.id", target = "recipientId")
     FriendRequestDto friendRequestToFriendRequestDto(FriendRequest entity);
+
+    // 친구
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "friend.id", target = "friendId")
+    @Mapping(source = "friend.nickname", target = "friendNickname")
+    FriendDto friendshipToFriendDto(Friendship entity);
 
     // 신고 요청
     @Mapping(source = "reporter.id", target = "reporterId")

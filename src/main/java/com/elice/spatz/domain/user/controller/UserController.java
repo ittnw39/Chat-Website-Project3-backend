@@ -5,11 +5,17 @@ import com.elice.spatz.domain.user.dto.LoginRequestDto;
 import com.elice.spatz.domain.user.dto.LoginResponseDto;
 import com.elice.spatz.domain.user.dto.UserRegisterDto;
 import com.elice.spatz.domain.user.dto.UserRegisterResultDto;
+import com.elice.spatz.domain.user.entity.Users;
 import com.elice.spatz.domain.user.service.UserService;
+import com.elice.spatz.domain.userfeature.model.dto.response.FriendDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,12 +23,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController

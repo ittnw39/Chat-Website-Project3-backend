@@ -7,9 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class FriendshipDto {
-    private Long id;
+public class FriendDto {
     private Long userId;
     private Long friendId;
-    private boolean friendStatus;
+    private String friendNickname;
 }
