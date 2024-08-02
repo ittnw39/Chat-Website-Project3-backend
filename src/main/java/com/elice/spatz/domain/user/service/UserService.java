@@ -28,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final AuthenticationManager authenticationManager;
+    private final AccessTokenProvider accessTokenProvider;
     private final Environment env;
 
     @Transactional
@@ -45,7 +46,7 @@ public class UserService {
                 String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
 
                 // JWT Access Token 생성
-                String accessToken = AccessTokenProvider.createAccessToken(secret,
+                String accessToken = accessTokenProvider.createAccessToken(secret,
                         authenticationResponse.getName(),
                         authenticationResponse.getAuthorities().stream().map(
                                 GrantedAuthority::getAuthority).collect(Collectors.joining(",")));

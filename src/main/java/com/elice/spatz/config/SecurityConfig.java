@@ -1,8 +1,11 @@
 package com.elice.spatz.config;
 
+import com.elice.spatz.domain.user.service.AccessTokenProvider;
+import com.elice.spatz.domain.user.service.RefreshTokenProvider;
 import com.elice.spatz.filter.JWTTokenGeneratorFilter;
 import com.elice.spatz.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +34,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final AccessTokenProvider accessTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
 
     // 인증과정 없이 요청 가능한 url
     String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**"};
@@ -72,7 +79,7 @@ public class SecurityConfig {
                 // 인증 작업 후에 JWT 토큰 생성
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 // 인증 작업 전 JWT 토큰 검증
-                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(accessTokenProvider, refreshTokenProvider), BasicAuthenticationFilter.class)
                 // X-Frame-Options 헤더설정 for h2-database
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
