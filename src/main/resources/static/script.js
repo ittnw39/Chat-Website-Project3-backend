@@ -1,5 +1,10 @@
 const apiUrl = 'http://localhost:8080/files'; // 서버의 API URL
 
+document.addEventListener('DOMContentLoaded', () => {
+    loadFileList();
+    loadDownloadedFileList();
+});
+
 function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
@@ -18,26 +23,29 @@ function uploadFile() {
     .then(response => response.text())
     .then(fileKey => {
         addFileToList(file.name, fileKey);
+        saveUploadedFile(file.name, fileKey);
     })
     .catch(error => {
         console.error('Error uploading file:', error);
         alert('Failed to upload file.');
     });
 }
+
 function loadFileList() {
     fetch(`${apiUrl}/list`, {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(fileList => {
-        fileList.forEach(fileKey => {
-            const fileName = fileKey.substring(fileKey.indexOf('_') + 1);
-            addFileToList(fileName, fileKey);
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(fileList => {
+            localStorage.setItem('uploadedFiles', JSON.stringify(fileList)); // 서버에서 가져온 파일 목록을 로컬 스토리지에 저장
+            fileList.forEach(fileKey => {
+                const fileName = fileKey.substring(fileKey.indexOf('_') + 1);
+                addFileToList(fileName, fileKey);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading file list:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error loading file list:', error);
-    });
 }
 
 function addFileToList(fileName, fileKey) {
@@ -120,6 +128,14 @@ function loadDownloadedFileList() {
     });
 }
 
+function saveUploadedFile(fileName, fileKey) {
+    const uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
+    if (!uploadedFiles.some(file => file.fileKey === fileKey)) {
+        uploadedFiles.push({ fileName, fileKey });
+        localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+    }
+}
+
 function saveDownloadedFile(fileName) {
     const downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles')) || [];
     if (!downloadedFiles.includes(fileName)) {
@@ -127,3 +143,4 @@ function saveDownloadedFile(fileName) {
         localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
     }
 }
+
