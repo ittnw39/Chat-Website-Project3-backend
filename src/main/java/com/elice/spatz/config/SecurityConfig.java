@@ -39,6 +39,7 @@ public class SecurityConfig {
 
     private final AccessTokenProvider accessTokenProvider;
     private final RefreshTokenProvider refreshTokenProvider;
+    private final JWTTokenValidatorFilter jwtTokenValidatorFilter;
 
     // 인증과정 없이 요청 가능한 url
     String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**"};
@@ -77,9 +78,9 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 // 인증 작업 후에 JWT 토큰 생성
-                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                //            .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 // 인증 작업 전 JWT 토큰 검증
-                .addFilterBefore(new JWTTokenValidatorFilter(accessTokenProvider, refreshTokenProvider), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
                 // X-Frame-Options 헤더설정 for h2-database
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))

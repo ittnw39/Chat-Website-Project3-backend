@@ -29,7 +29,7 @@ public class AccessTokenProvider {
                 .claim("username", username)
                 .claim("authorities", authorities)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + 50000)) // access token의 경우 유효시간을 30분으로 설정 1800000
+                .expiration(new Date((new Date()).getTime() + 1800000)) // access token의 경우 유효시간을 30분으로 설정 1800000
                 .signWith(secretKey).compact();
     }
 
