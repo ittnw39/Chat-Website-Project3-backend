@@ -57,8 +57,8 @@ public class UserController {
 
         SignInResponse signInResponse = userService.signIn(signInRequest);
 
-        return ResponseEntity.status(HttpStatus.OK).header(ApplicationConstants.JWT_HEADER, signInResponse.getJwtToken())
-                .body(new SignInResponse(HttpStatus.OK.getReasonPhrase(), signInResponse.getJwtToken()));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(signInResponse);
     }
 
 

@@ -23,11 +23,11 @@ public class AccessTokenProvider {
     public static String createAccessToken(String secret, String username, String authorities) {
         SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
-        return Jwts.builder().issuer("spatz").subject("JWT Token")
+        return Jwts.builder().issuer("spatz").subject(username)
                 .claim("username", username)
                 .claim("authorities", authorities)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + 30000000))
+                .expiration(new Date((new Date()).getTime() + 100)) // access token의 경우 유효시간을 30분으로 설정 1800000
                 .signWith(secretKey).compact();
     }
 
