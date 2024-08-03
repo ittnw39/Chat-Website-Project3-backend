@@ -50,11 +50,10 @@ public class UserFeatureService {
     public Page<BlockDto> getBlocks(long blockerId, Pageable pageable){
         Page<Block> blocks = blockRepository.findAllByBlockerId(blockerId, pageable);
         List<BlockDto> blockDtoList = new ArrayList<>();
+        blockDtoList = blocks.getContent().stream()
+                .map(responseMapper::blockToBlockDto)
+                .collect(Collectors.toList());
 
-        for(Block block : blocks) {
-            BlockDto blockDto = responseMapper.blockToBlockDto(block);
-            blockDtoList.add(blockDto);
-        }
         return new PageImpl<>(blockDtoList, pageable, blocks.getTotalElements());
     }
     // 3. 차단 해제 (하드딜리트)
