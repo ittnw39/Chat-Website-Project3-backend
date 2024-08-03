@@ -34,7 +34,5 @@ public interface ResponseMapper {
     @Mapping(source = "reporter.id", target = "reporterId")
     @Mapping(source = "reported.id", target = "reportedId")
     @Mapping(source = "reportReason", target = "reportReason")
-    @Mapping(source = "reportURL", target = "reportURL")
-    @Mapping(source = "reportStatus", target = "reportStatus")
     ReportDto reportToReportDto(Report entity);
 }

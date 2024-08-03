@@ -1,33 +1,27 @@
 package com.elice.spatz.domain.userfeature.service;
 
 import com.elice.spatz.domain.user.entity.Users;
-import com.elice.spatz.domain.userfeature.model.dto.request.BlockCreateDto;
-import com.elice.spatz.domain.userfeature.model.dto.request.FriendRequestCreateDto;
-import com.elice.spatz.domain.userfeature.model.dto.request.RequestMapper;
-import com.elice.spatz.domain.userfeature.model.dto.response.BlockDto;
-import com.elice.spatz.domain.userfeature.model.dto.response.FriendDto;
-import com.elice.spatz.domain.userfeature.model.dto.response.FriendRequestDto;
-import com.elice.spatz.domain.userfeature.model.dto.response.ResponseMapper;
-import com.elice.spatz.domain.userfeature.model.entity.Block;
-import com.elice.spatz.domain.userfeature.model.entity.FriendRequest;
-import com.elice.spatz.domain.userfeature.model.entity.Friendship;
-import com.elice.spatz.domain.userfeature.model.entity.Status;
+import com.elice.spatz.domain.userfeature.model.dto.request.*;
+import com.elice.spatz.domain.userfeature.model.dto.response.*;
+import com.elice.spatz.domain.userfeature.model.entity.*;
 import com.elice.spatz.domain.userfeature.repository.BlockRepository;
 import com.elice.spatz.domain.userfeature.repository.FriendRequestRepository;
 import com.elice.spatz.domain.userfeature.repository.FriendshipRepository;
+import com.elice.spatz.domain.userfeature.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.elice.spatz.domain.userfeature.model.entity.Status.ACCEPTED;
-import static com.elice.spatz.domain.userfeature.model.entity.Status.REJECTED;
+import static com.elice.spatz.domain.userfeature.model.entity.Status.*;
 import static java.lang.Boolean.TRUE;
 
 @Service
@@ -36,6 +30,7 @@ public class UserFeatureService {
     private final BlockRepository blockRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final FriendshipRepository friendshipRepository;
+    private final ReportRepository reportRepository;
     private final RequestMapper requestMapper;
     private final ResponseMapper responseMapper;
 
@@ -185,5 +180,43 @@ public class UserFeatureService {
     @Transactional
     public void deleteFriendShip(long id){
         friendshipRepository.deleteById(id);
+    }
+
+    // 1. 신고 요청
+    @Transactional
+    public void createReport(ReportCreateDto reportCreateDto, MultipartFile file)throws IOException {
+        byte[] imageBytes = file.getBytes();
+        Report newReport = requestMapper.reportCreateDtoToReport(reportCreateDto);
+        newReport.setReportImage(imageBytes);
+        newReport.setReportStatus(WAITING);
+        reportRepository.save(newReport);
+    }
+    // 2. 처리 전/후 신고 조회
+    @Transactional
+    public Page<ReportDto> getReports(long reporterId, Status status, Pageable pageable){
+        Page<Report> reports = reportRepository.findAllByReporterIdAndReportStatus(reporterId, status, pageable);
+        List<ReportDto> reportDtoList = reports.getContent().stream()
+                .map(responseMapper::reportToReportDto)
+                .collect(Collectors.toList());
+        return new PageImpl<>(reportDtoList, pageable, reports.getTotalElements());
+    }
+    // 3. 신고 수정
+    @Transactional
+    public void updateReport(ReportUpdateDto reportUpdateDto, long id, MultipartFile file)throws IOException {
+        Report existingReport = reportRepository.findById(id).orElseThrow();
+
+        existingReport.setReportReason(reportUpdateDto.getReportReason());
+
+        if(!file.isEmpty()){
+            byte[] imageBytes = file.getBytes();
+            existingReport.setReportImage(imageBytes);
+        }
+
+        reportRepository.save(existingReport);
+    }
+    // 4. 처리 전/후 신고 삭제
+    @Transactional
+    public void deleteReport(long reportId){
+        reportRepository.deleteById(reportId);
     }
 }

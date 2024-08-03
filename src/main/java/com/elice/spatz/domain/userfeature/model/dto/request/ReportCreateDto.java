@@ -12,6 +12,4 @@ public class ReportCreateDto {
     private long reporterId;
     private long reportedId;
     private String reportReason;
-    private String reportURL;
-    private Status reportStatus;
 }
