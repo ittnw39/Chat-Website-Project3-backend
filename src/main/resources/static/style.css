@@ -1,0 +1,21 @@
+.container {
+    width: 50%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.file-item img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.file-item button {
+    margin-left: 10px;
+}
