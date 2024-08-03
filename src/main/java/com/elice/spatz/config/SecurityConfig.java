@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/files/**").permitAll()
+                        .requestMatchers(urlsToBeAuthenticated).authenticated()
                         .anyRequest().permitAll()
                 )
                 .headers(headers -> headers
