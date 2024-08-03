@@ -36,36 +36,34 @@ public class UserService {
         String accessJwtToken = "";
         String refreshJwtToken = "";
 
+        // 사용자가 입력한 아이디와 비밀번호를 통해서 인증작업 진행
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.unauthenticated(signInRequest.getUsername(), signInRequest.getPassword());
+
+        // 사용자가 입력한 데이터로 수행한 인증 결과를 반환한다.
         Authentication authenticationResponse = authenticationManager.authenticate(authentication);
 
+        // 인증이 성공적으로 수행되었다면 다음 블록을 수행
         if(null != authenticationResponse && authenticationResponse.isAuthenticated()) {
-            if (null != env) {
-                // 서명용 키
-                String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
 
-                // JWT Access Token 생성
-                String accessToken = tokenProvider.createAccessToken(secret,
-                        authenticationResponse.getName(),
-                        authenticationResponse.getAuthorities().stream().map(
-                                GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+            Users user = userRepository.findByEmail(authenticationResponse.getName())
+                    .orElseThrow(() -> new IllegalStateException("입력한 이메일에 해당하는 사용자가 없습니다."));
 
-                accessJwtToken = accessToken;
+            // JWT Access Token 생성
+            accessJwtToken = tokenProvider.createAccessToken(
+                    user.getId(),
+                    authenticationResponse.getName(),
+                    authenticationResponse.getAuthorities().stream().map(
+                            GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
 
-                // JWT Refresh Token 생성
-                String refreshToken = tokenProvider.createRefreshToken(secret);
+            // JWT Refresh Token 생성
+            String refreshToken = tokenProvider.createRefreshToken();
+            refreshJwtToken = refreshToken;
 
-                refreshJwtToken = refreshToken;
-
-                // 이미 DB에 저장중인 Refresh Token이 있다면 갱신하고, 없다면 DB에 추가하기
-                Users user = userRepository.findByEmail(authenticationResponse.getName()).orElseThrow(() -> new IllegalStateException("사용자가 존재하지 않습니다"));
-                userRefreshTokenRepository.findByUser(user).ifPresentOrElse(
-                        it -> it.updateRefreshToken(refreshToken),
-                        () -> userRefreshTokenRepository.save(new UserRefreshToken(user, refreshToken))
-                );
-
-
-            }
+            // 이미 DB에 저장중인 Refresh Token 이 있다면 갱신하고, 없다면 DB에 추가하기
+            userRefreshTokenRepository.findByUser(user).ifPresentOrElse(
+                    it -> it.updateRefreshToken(refreshToken),
+                    () -> userRefreshTokenRepository.save(new UserRefreshToken(user, refreshToken))
+            );
         }
 
         return new SignInResponse(signInRequest.getUsername(), accessJwtToken, refreshJwtToken);	// 생성자에 토큰 추가

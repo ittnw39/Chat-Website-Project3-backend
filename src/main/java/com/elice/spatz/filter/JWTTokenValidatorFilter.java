@@ -24,6 +24,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -39,25 +41,19 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
         // 클라이언트가 보낸 access Token 추출하기
         // Bearer 공백 이후의 문자열을 추출한다.
-        String jwt = parseBearerToken(request, ApplicationConstants.JWT_HEADER);
-
-        Environment env = getEnvironment();
-        String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
-        SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String accessToken = parseBearerToken(request, ApplicationConstants.JWT_HEADER);
 
         // 만약 클라이언트가 JWT 토큰을 보내지 않았다면 필터링을 수행하지 않는다.
-        if(jwt != null) {
+        if(accessToken != null) {
             try {
+                // 토큰 유효성 검사
+                tokenProvider.validateTokenIsExpiredOrTampered(accessToken);
 
-                // 토큰 유효성 검사 이후 페이로드 부분을 추출
-                Claims claims = Jwts.parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parseSignedClaims(jwt) // 실질적으로 access JWT 토큰의 변조 여부 + 유효기간 만료 여부가 검사되는 부분이다.
-                        .getPayload();
+                // 토큰 페이로드 추출
+                Map payloadFromJWTToken = tokenProvider.getPayloadFromJWTToken(accessToken);
 
-                String username = String.valueOf(claims.get("username"));
-                String authorities = String.valueOf(claims.get("authorities"));
+                String username = String.valueOf(payloadFromJWTToken.get("username"));
+                String authorities = String.valueOf(payloadFromJWTToken.get("authorities"));
 
                 // 인증을 마치고 인증정보를 SecurityContext에 담는 과정
                 Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
@@ -91,24 +87,19 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
                 throw exception;
             }
 
+            // 기간이 만료된 액세스 토큰
             String oldAccessToken = parseBearerToken(request, ApplicationConstants.JWT_HEADER);
 
+            // 현재 Refresh Token 이 유효한가 + 재발급 횟수가 남아있는 지 여부를 확인
             tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
 
+            // 새로 발급된 액세스 토큰
             String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
 
-            Environment env = getEnvironment();
-            String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
-            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+            Map newAccessTokenPayload = tokenProvider.getPayloadFromJWTToken(newAccessToken);
 
-            Claims newClaim = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()// 실질적으로 access JWT 토큰의 변조 여부 + 유효기간 만료 여부가 검사되는 부분이다.
-                    .parseSignedClaims(newAccessToken)
-                    .getPayload();
-
-            String username = String.valueOf(newClaim.get("username"));
-            String authorities = String.valueOf(newClaim.get("authorities"));
+            String username = String.valueOf(newAccessTokenPayload.get("username"));
+            String authorities = String.valueOf(newAccessTokenPayload.get("authorities"));
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
                     AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
