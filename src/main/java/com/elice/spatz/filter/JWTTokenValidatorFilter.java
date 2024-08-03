@@ -1,10 +1,7 @@
 package com.elice.spatz.filter;
 
 import com.elice.spatz.constants.ApplicationConstants;
-import com.elice.spatz.domain.user.repository.UserRefreshTokenRepository;
-import com.elice.spatz.domain.user.repository.UserRepository;
-import com.elice.spatz.domain.user.service.AccessTokenProvider;
-import com.elice.spatz.domain.user.service.RefreshTokenProvider;
+import com.elice.spatz.domain.user.service.TokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -15,9 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,8 +32,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
     private boolean isExecutedBefore = false;
 
-    private final AccessTokenProvider accessTokenProvider;
-    private final RefreshTokenProvider refreshTokenProvider;
+    private final TokenProvider tokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -99,9 +93,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
             String oldAccessToken = parseBearerToken(request, ApplicationConstants.JWT_HEADER);
 
-            refreshTokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
+            tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
 
-            String newAccessToken = refreshTokenProvider.recreateAccessToken(oldAccessToken);
+            String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
 
             Environment env = getEnvironment();
             String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);

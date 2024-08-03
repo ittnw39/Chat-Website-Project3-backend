@@ -9,13 +9,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -24,22 +22,36 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenProvider {
+public class TokenProvider {
 
     private final int reIssueLimit = 5;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final UserRepository userRepository;
     private final Environment env;
-    private final AccessTokenProvider accessTokenProvider;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private Long accessTokenExpiration = 30000L;
+    private Long refreshTokenExpiration = 86400000L;
+
+    // Access Token 을 생성하는 메소드
+    public String createAccessToken(String secret, String username, String authorities) {
+        SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.builder().issuer("spatz").subject(username)
+                .claim("username", username)
+                .claim("authorities", authorities)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date().getTime() + accessTokenExpiration))) // access token의 경우 유효시간을 30분으로 설정 1800000
+                .signWith(secretKey).compact();
+    }
+
     // Refresh Token 을 발급하는 메소드
-    public static String createRefreshToken(String secret) {
+    public String createRefreshToken(String secret) {
         SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder().issuer("spatz")
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + 86400000)) // refresh token의 경우 24시간의 만료시간을 둔다.
+                .expiration(new Date((new Date()).getTime() + refreshTokenExpiration)) // refresh token의 경우 24시간의 만료시간을 둔다.
                 .signWith(secretKey).compact();
     }
 
@@ -59,7 +71,7 @@ public class RefreshTokenProvider {
 
         String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
 
-        return accessTokenProvider.createAccessToken(secret, username, authorities);
+        return createAccessToken(secret, username, authorities);
 
     }
 
