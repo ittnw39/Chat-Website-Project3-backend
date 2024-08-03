@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -28,8 +27,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final AuthenticationManager authenticationManager;
-    private final AccessTokenProvider accessTokenProvider;
     private final Environment env;
+    private final TokenProvider tokenProvider;
 
     @Transactional
     public SignInResponse signIn(SignInRequest signInRequest) {
@@ -46,7 +45,7 @@ public class UserService {
                 String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
 
                 // JWT Access Token 생성
-                String accessToken = accessTokenProvider.createAccessToken(secret,
+                String accessToken = tokenProvider.createAccessToken(secret,
                         authenticationResponse.getName(),
                         authenticationResponse.getAuthorities().stream().map(
                                 GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
@@ -54,7 +53,7 @@ public class UserService {
                 accessJwtToken = accessToken;
 
                 // JWT Refresh Token 생성
-                String refreshToken = RefreshTokenProvider.createRefreshToken(secret);
+                String refreshToken = tokenProvider.createRefreshToken(secret);
 
                 refreshJwtToken = refreshToken;
 

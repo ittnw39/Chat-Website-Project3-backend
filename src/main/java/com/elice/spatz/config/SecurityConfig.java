@@ -1,8 +1,6 @@
 package com.elice.spatz.config;
 
-import com.elice.spatz.domain.user.service.AccessTokenProvider;
-import com.elice.spatz.domain.user.service.RefreshTokenProvider;
-import com.elice.spatz.filter.JWTTokenGeneratorFilter;
+import com.elice.spatz.domain.user.service.TokenProvider;
 import com.elice.spatz.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,8 +31,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AccessTokenProvider accessTokenProvider;
-    private final RefreshTokenProvider refreshTokenProvider;
+    private final TokenProvider refreshTokenProvider;
     private final JWTTokenValidatorFilter jwtTokenValidatorFilter;
 
     // 인증과정 없이 요청 가능한 url
