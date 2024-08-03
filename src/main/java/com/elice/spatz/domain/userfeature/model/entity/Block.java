@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Block extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "blockerId", nullable = false)
@@ -26,7 +26,4 @@ public class Block extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "blockedId", nullable = false)
     private Users blocked;
-
-    @Column(nullable = false)
-    private boolean blockStatus;
 }

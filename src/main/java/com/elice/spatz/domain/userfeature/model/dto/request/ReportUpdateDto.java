@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ReportUpdateDto {
-    private int id;
+    private long id;
     private long reporterId;
     private long reportedId;
     private String reportReason;
-    private String reportURL;
-    private Status reportStatus;
 }

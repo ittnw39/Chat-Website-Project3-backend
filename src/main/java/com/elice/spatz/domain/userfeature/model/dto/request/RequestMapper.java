@@ -16,7 +16,6 @@ public interface RequestMapper {
     // 차단
     @Mapping(source = "blockerId", target = "blocker", qualifiedByName = "idToUser")
     @Mapping(source = "blockedId", target = "blocked", qualifiedByName = "idToUser")
-    @Mapping(source = "blockStatus", target = "blockStatus")
     Block blockCreateDtoToBlock(BlockCreateDto dto);
 
     // 친구 요청
@@ -29,8 +28,6 @@ public interface RequestMapper {
     @Mapping(source = "reporterId", target = "reporter", qualifiedByName = "idToUser")
     @Mapping(source = "reportedId", target = "reported", qualifiedByName = "idToUser")
     @Mapping(source = "reportReason", target = "reportReason")
-    @Mapping(source = "reportURL", target = "reportURL")
-    @Mapping(source = "reportStatus", target = "reportStatus")
     Report reportCreateDtoToReport(ReportCreateDto dto);
 
     // 신고 수정
@@ -38,8 +35,6 @@ public interface RequestMapper {
     @Mapping(source = "reporterId", target = "reporter", qualifiedByName = "idToUser")
     @Mapping(source = "reportedId", target = "reported", qualifiedByName = "idToUser")
     @Mapping(source = "reportReason", target = "reportReason")
-    @Mapping(source = "reportURL", target = "reportURL")
-    @Mapping(source = "reportStatus", target = "reportStatus")
     Report reportUpdateDtoToReport(ReportUpdateDto dto);
 
     // Users 객체 변환
