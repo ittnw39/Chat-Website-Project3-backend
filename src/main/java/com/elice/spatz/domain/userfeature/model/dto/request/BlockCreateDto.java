@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 public class BlockCreateDto {
     private long blockerId;
     private long blockedId;
-    private boolean blockStatus;
 }

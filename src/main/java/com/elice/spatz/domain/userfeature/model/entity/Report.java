@@ -30,8 +30,9 @@ public class Report extends BaseEntity {
     @Column(nullable = false, length = 300)
     private String reportReason;
 
-    @Column(nullable = false, length = 1000)
-    private String reportURL;
+    @Lob
+    @Column(nullable = false)
+    private byte[] reportImage;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

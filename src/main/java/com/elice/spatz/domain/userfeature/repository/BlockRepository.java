@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long> {
     // 차단한 사용자 목록
-    Page<Block> findAllByBlockerIdAndBlockStatusIsTrue(Long id, Pageable pageable);
+    Page<Block> findAllByBlockerId(Long id, Pageable pageable);
 
 }

@@ -26,7 +26,4 @@ public class Block extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "blockedId", nullable = false)
     private Users blocked;
-
-    @Column(nullable = false)
-    private boolean blockStatus;
 }
