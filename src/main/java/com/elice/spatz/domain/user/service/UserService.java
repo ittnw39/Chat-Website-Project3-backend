@@ -44,22 +44,4 @@ public class UserService {
         return userRepository.findUsersByEmail(email).isEmpty();
     }
 
-    // userFeature: 친구 검색 조회 기능
-    @Transactional
-    public Page<FriendDto> getFriendshipsByKeyword(String nickName, long userId, Pageable pageable) {
-        Page<Users> usersPage = userRepository.findAllByNicknameContainingIgnoreCase(nickName, pageable);
-
-        // 친구 여부 확인
-        List<FriendDto> friendDtos = usersPage.getContent().stream()
-                .filter(user -> friendshipRepository.existsByUserIdAndFriendId(userId, user.getId()))
-                .map(user -> new FriendDto(
-                        userId,
-                        user.getId(),
-                        user.getNickname()
-                ))
-                .collect(Collectors.toList());
-
-        long totalElements = friendDtos.size();
-        return new PageImpl<>(friendDtos, pageable, totalElements);
-    }
 }

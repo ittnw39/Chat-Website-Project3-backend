@@ -15,6 +15,4 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
     List<Users> findUsersByEmail(String email);
 
-    // userFeature: 친구 검색 조회 기능
-    Page<Users> findAllByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
 }

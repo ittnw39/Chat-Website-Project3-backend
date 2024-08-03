@@ -10,5 +10,6 @@ import lombok.Setter;
 public class FriendDto {
     private Long userId;
     private Long friendId;
+    private String userNickname;
     private String friendNickname;
 }
