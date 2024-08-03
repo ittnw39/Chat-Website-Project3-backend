@@ -1,8 +1,9 @@
 package com.elice.spatz.config;
 
-import com.elice.spatz.filter.JWTTokenGeneratorFilter;
+import com.elice.spatz.domain.user.service.TokenProvider;
 import com.elice.spatz.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,15 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +28,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final TokenProvider refreshTokenProvider;
+    private final JWTTokenValidatorFilter jwtTokenValidatorFilter;
 
     // 인증과정 없이 요청 가능한 url
     String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**"};
@@ -70,18 +71,16 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 // 인증 작업 후에 JWT 토큰 생성
-                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                //            .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 // 인증 작업 전 JWT 토큰 검증
-                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
                 // X-Frame-Options 헤더설정 for h2-database
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-//                .formLogin(form -> form
-//                        .loginPage("/login") // 사용자 정의 로그인 페이지 설정
-//                        .permitAll() // 모든 사용자에게 로그인 페이지 접근 허용
-//                ) // 기본 로그인 페이지 사용
                 .httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()))
-                .logout(withDefaults()); // 로그아웃도 허용
+                .exceptionHandling(ehc -> ehc
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())) // 403 Unauthorized 관련 예외 전역 처리
+                .logout(withDefaults());
 
         return http.build();
     }
