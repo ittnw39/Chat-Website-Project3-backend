@@ -16,7 +16,6 @@ public interface RequestMapper {
     // 차단
     @Mapping(source = "blockerId", target = "blocker", qualifiedByName = "idToUser")
     @Mapping(source = "blockedId", target = "blocked", qualifiedByName = "idToUser")
-    @Mapping(source = "blockStatus", target = "blockStatus")
     Block blockCreateDtoToBlock(BlockCreateDto dto);
 
     // 친구 요청

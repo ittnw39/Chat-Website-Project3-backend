@@ -48,7 +48,7 @@ public class UserFeatureService {
     // 2. 차단 조회
     @Transactional
     public Page<BlockDto> getBlocks(long blockerId, Pageable pageable){
-        Page<Block> blocks = blockRepository.findAllByBlockerIdAndBlockStatusIsTrue(blockerId, pageable);
+        Page<Block> blocks = blockRepository.findAllByBlockerId(blockerId, pageable);
         List<BlockDto> blockDtoList = new ArrayList<>();
 
         for(Block block : blocks) {
@@ -57,12 +57,10 @@ public class UserFeatureService {
         }
         return new PageImpl<>(blockDtoList, pageable, blocks.getTotalElements());
     }
-    // 3. 차단 해제
+    // 3. 차단 해제 (하드딜리트)
     @Transactional
     public void unBlock(long id) {
-        Block newBlock = blockRepository.findById(id).orElseThrow();
-        newBlock.setBlockStatus(false);
-        blockRepository.save(newBlock);
+        blockRepository.deleteById(id);
     }
 
     // 1. 친구 요청
@@ -112,7 +110,7 @@ public class UserFeatureService {
         }
         friendRequestRepository.save(receivedFriendRequest);
     }
-    // 4. 보낸 요청 삭제
+    // 4. 보낸/받은 요청 삭제 (하드딜리트)
     @Transactional
     public void deleteSentFriendRequest(long id){
         friendRequestRepository.deleteById(id);
@@ -184,10 +182,9 @@ public class UserFeatureService {
         long totalElements = allFriendDtos.size();
         return new PageImpl<>(allFriendDtos, pageable, totalElements);
     }
-    // 3. 친구 해제
+    // 3. 친구 해제 (하드딜리트)
     @Transactional
     public void deleteFriendShip(long id){
-        Friendship friendship = friendshipRepository.findById(id).orElseThrow();
-        friendship.setFriendStatus(false);
+        friendshipRepository.deleteById(id);
     }
 }

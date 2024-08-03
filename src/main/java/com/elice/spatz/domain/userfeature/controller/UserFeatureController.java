@@ -34,8 +34,8 @@ public class UserFeatureController {
         Page<BlockDto> blocks = userFeatureService.getBlocks(blockerId, pageable);
         return ResponseEntity.ok(blocks);
     }
-    // 3. 차단 해제
-    @PatchMapping("/unblock")
+    // 3. 차단 해제 (하드딜리트)
+    @DeleteMapping("/unblock")
     public ResponseEntity<String> unBlock(@RequestParam long blockId){
         userFeatureService.unBlock(blockId);
         return ResponseEntity.ok("차단 해제가 완료되었습니다.");
@@ -59,7 +59,7 @@ public class UserFeatureController {
         userFeatureService.responseReceivedFriendRequest(friendRequestId, status);
         return ResponseEntity.ok("받은 요청에 대한 응답이 완료되었습니다.");
     }
-    // 4. 보낸 요청 삭제
+    // 4. 보낸/받은 요청 삭제 (하드딜리트)
     @DeleteMapping("/friend-request")
     public ResponseEntity<String> deleteSentFriendRequest(@RequestParam long friendRequestId){
         userFeatureService.deleteSentFriendRequest(friendRequestId);
@@ -78,8 +78,8 @@ public class UserFeatureController {
         Page<FriendDto> friendDtosByKeyword = userFeatureService.getFriendshipsByKeyword(keyword, userId, pageable);
         return ResponseEntity.ok(friendDtosByKeyword);
     }
-    // 3. 친구 해제
-    @PatchMapping("/un-friendship")
+    // 3. 친구 해제 (하드딜리트)
+    @DeleteMapping("/un-friendship")
     public ResponseEntity<String> deleteFriendship(@RequestParam long friendshipId){
         userFeatureService.deleteFriendShip(friendshipId);
         return ResponseEntity.ok("친구 삭제가 완료되었습니다.");

@@ -16,7 +16,6 @@ public interface ResponseMapper {
     // 차단
     @Mapping(source = "blocker.id", target = "blockerId")
     @Mapping(source = "blocked.id", target = "blockedId")
-    @Mapping(source = "blockStatus", target = "blockStatus")
     BlockDto blockToBlockDto(Block entity);
 
     // 친구 요청

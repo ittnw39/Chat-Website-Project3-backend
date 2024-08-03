@@ -12,6 +12,4 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     // 친구 조회
     Page<Friendship> findAllByUserId(Long userId, Pageable pageable);
     Page<Friendship> findAllByFriendId(Long friendId, Pageable pageable);
-    // 친구 관계 조회
-    boolean existsByUserIdAndFriendId(Long userId, Long friendId);
 }
