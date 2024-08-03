@@ -67,6 +67,7 @@ public class SecurityConfig {
                 }))
                 // 인증이 필요한 url 과 그렇지 않은 url 설정
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/files/**").permitAll()
                         .requestMatchers(urlsToBeAuthenticated).authenticated()
                         .anyRequest().permitAll()
                 )
