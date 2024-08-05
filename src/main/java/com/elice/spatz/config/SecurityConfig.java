@@ -18,9 +18,9 @@ import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.oauth2.client.registration.ClientRegistration;
-//import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-//import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -86,7 +86,7 @@ public class SecurityConfig {
                 .exceptionHandling(ehc -> ehc
                         .accessDeniedHandler(new CustomAccessDeniedHandler()))
                 // OAuth 이용한 로그인 시 기본 설정.
-//                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(Customizer.withDefaults())
                 .logout(withDefaults());
 
         return http.build();
@@ -108,25 +108,5 @@ public class SecurityConfig {
         providerManager.setEraseCredentialsAfterAuthentication(false); // 인증과정에서 authentication객체의 비밀번호를 지우지 않고 넘겨주어서 사용자 정의 인증로직이 제대로 동작하게 함.
         return  providerManager;
     }
-
-//    @Bean
-//    ClientRegistrationRepository clientRegistrationRepository() {
-//        ClientRegistration github = githubClientRegistration();
-//        return new InMemoryClientRegistrationRepository();
-//    }
-//
-//    private ClientRegistration githubClientRegistration () {
-//        return CommonOAuth2Provider.GITHUB.getBuilder("github")
-//                .clientId("")
-//                .clientSecret("")
-//                .build();
-//    }
-//
-//    private ClientRegistration facebookClientRegistration () {
-//        return CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
-//                .clientId("")
-//                .clientSecret("")
-//                .build();
-//    }
 
 }
