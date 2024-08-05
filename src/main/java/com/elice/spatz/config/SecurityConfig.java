@@ -8,14 +8,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.oauth2.client.registration.ClientRegistration;
+//import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+//import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,7 +36,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final TokenProvider refreshTokenProvider;
     private final JWTTokenValidatorFilter jwtTokenValidatorFilter;
 
     // 인증과정 없이 요청 가능한 url
@@ -39,7 +43,7 @@ public class SecurityConfig {
 
     // 인증 과정이 필요하여
     // 인증 없이 요청한 경우 로그인 페이지로 리다이렉션 합니다.
-    String[] urlsToBeAuthenticated = {"/logout", "/test"};
+    String[] urlsToBeAuthenticated = {"/logout"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -71,16 +75,18 @@ public class SecurityConfig {
                         .requestMatchers(urlsToBeAuthenticated).authenticated()
                         .anyRequest().permitAll()
                 )
-                // 인증 작업 후에 JWT 토큰 생성
-                //            .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
-                // 인증 작업 전 JWT 토큰 검증
+                // 인증 작업 전 JWT 토큰 검증용 필터 추가
                 .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
-                // X-Frame-Options 헤더설정 for h2-database
+                // X-Frame-Options 헤더설정 for h2-database console
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                // Basic Authentication 이용한 인증작업 실패 시 어떠한 루틴이 실행될 것인가 설정.
                 .httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()))
+                // 403 Forbidden Error 발생 시 어떠한 루틴이 실행될 것인가 설정.
                 .exceptionHandling(ehc -> ehc
-                        .accessDeniedHandler(new CustomAccessDeniedHandler())) // 403 Unauthorized 관련 예외 전역 처리
+                        .accessDeniedHandler(new CustomAccessDeniedHandler()))
+                // OAuth 이용한 로그인 시 기본 설정.
+//                .oauth2Login(Customizer.withDefaults())
                 .logout(withDefaults());
 
         return http.build();
@@ -102,5 +108,25 @@ public class SecurityConfig {
         providerManager.setEraseCredentialsAfterAuthentication(false); // 인증과정에서 authentication객체의 비밀번호를 지우지 않고 넘겨주어서 사용자 정의 인증로직이 제대로 동작하게 함.
         return  providerManager;
     }
+
+//    @Bean
+//    ClientRegistrationRepository clientRegistrationRepository() {
+//        ClientRegistration github = githubClientRegistration();
+//        return new InMemoryClientRegistrationRepository();
+//    }
+//
+//    private ClientRegistration githubClientRegistration () {
+//        return CommonOAuth2Provider.GITHUB.getBuilder("github")
+//                .clientId("")
+//                .clientSecret("")
+//                .build();
+//    }
+//
+//    private ClientRegistration facebookClientRegistration () {
+//        return CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
+//                .clientId("")
+//                .clientSecret("")
+//                .build();
+//    }
 
 }
