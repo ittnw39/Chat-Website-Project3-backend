@@ -25,14 +25,10 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TokenProvider {
 
-    private final int reIssueLimit = 5;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final UserRepository userRepository;
     private final Environment env;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final Long accessTokenExpiration = 30000L;
-    private final Long refreshTokenExpiration = 86400000L;
 
     private SecretKey secretKey = null;
 
@@ -52,7 +48,7 @@ public class TokenProvider {
                 .claim("username", username)
                 .claim("authorities", authorities)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date().getTime() + accessTokenExpiration)))
+                .expiration(new Date((new Date().getTime() + ApplicationConstants.ACCESS_TOKEN_EXPIRATION)))
                 .signWith(secretKey).compact();
     }
 
@@ -61,7 +57,7 @@ public class TokenProvider {
 
         return Jwts.builder().issuer("spatz")
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + refreshTokenExpiration)) // refresh token의 경우 24시간의 만료시간을 둔다.
+                .expiration(new Date((new Date()).getTime() + ApplicationConstants.REFRESH_TOKEN_EXPIRATION))
                 .signWith(secretKey)
                 .compact();
     }
@@ -76,7 +72,7 @@ public class TokenProvider {
 
         // 현재 클라이언트가 보낸 Refresh Token 의 주인이 맞는 지 검증 + 재발급 횟수가 남아있는 지 검증
         UserRefreshToken userRefreshToken = userRefreshTokenRepository
-                .findByUserAndReIssueCountLessThan(user, reIssueLimit)
+                .findByUserAndReIssueCountLessThan(user, ApplicationConstants.REFRESH_TOKEN_RE_ISSUE_LIMIT)
                 .orElseThrow(() -> new ExpiredJwtException(null, null, "Refresh Token Expired!"));
 
         // Access Token 재발급 시 reIssue count를 증가시킨다.
@@ -99,7 +95,7 @@ public class TokenProvider {
 
         Users user = userRepository.findByEmail(username).orElseThrow(() -> new IllegalStateException("해당하는 유저정보가 존재하지 않습니다"));
 
-        userRefreshTokenRepository.findByUserAndReIssueCountLessThan(user, reIssueLimit)
+        userRefreshTokenRepository.findByUserAndReIssueCountLessThan(user, ApplicationConstants.REFRESH_TOKEN_RE_ISSUE_LIMIT)
                         .filter(userRefreshToken -> userRefreshToken.validateRefreshToken(refreshToken))
                                 .orElseThrow(() -> new ExpiredJwtException(null, null, "Refresh token Expired!"));
     }
