@@ -19,11 +19,17 @@ public class ChatMessage implements Serializable {
         private boolean isDeleted;
         private boolean isEdited;
 
+
         public ChatMessage(String channelId, String senderId, String content) {
                 this.channelId = channelId;
                 this.senderId = senderId;
                 this.content = content;
+                this.createdTime = LocalDateTime.now();
+                this.updatedTime = LocalDateTime.now();
+                this.isDeleted = false;
+                this.isEdited = false;
         }
+
 
         // 메시지 수정 메서드
         public void updateContent(String newContent) {
