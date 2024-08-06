@@ -28,6 +28,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole()));
 
-        return new CustomUserDetails(user.getId(), user.getEmail(), user.getPassword(), user.getRole());
+        return new CustomUserDetails(user.getId(), user.getEmail(), user.getPassword(), user.getRole(), user.getNickname());
     }
 }

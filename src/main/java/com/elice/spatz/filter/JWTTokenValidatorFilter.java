@@ -60,7 +60,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
                 Users user = userRepository.findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
 
-                CustomUserDetails principal = new CustomUserDetails(userId, user.getEmail(), user.getPassword(), user.getRole());
+                CustomUserDetails principal = new CustomUserDetails(userId, user.getEmail(), user.getPassword(), user.getRole(), user.getNickname());
 
 
                 // 인증을 마치고 인증에 성공한 유저의 정보를 Security Context 에 담는 과정

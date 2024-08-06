@@ -48,4 +48,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
+    @GetMapping("/test")
+    public String test(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        System.out.println("customUserDetails = " + customUserDetails);
+        System.out.println("nickname" + customUserDetails.getNickname());
+        return "str";
+    }
+
 }
