@@ -1,114 +1,174 @@
 package com.elice.spatz.domain.chat.service;
 
 import com.elice.spatz.domain.chat.entity.ChatMessage;
-import org.springframework.data.redis.core.HashOperations;
+import com.elice.spatz.exception.errorCode.ChatErrorCode;
+import com.elice.spatz.exception.exception.ChatException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 
 @Service
 public class ChatService {
 
-    private final HashOperations<String, String, ChatMessage> hashOperations;
+    // 메시지의 유효 기간을 2일(초 단위)로 설정
+    private static final long MESSAGE_TTL = 2 * 24 * 60 * 60;
+
     private final RedisTemplate<String, ChatMessage> redisTemplate;
 
-    private final SimpMessagingTemplate messagingTemplate;
-
-
-    public ChatService(RedisTemplate<String, ChatMessage> redisTemplate, SimpMessagingTemplate messagingTemplate) {
+    @Autowired
+    public ChatService(RedisTemplate<String, ChatMessage> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.hashOperations = redisTemplate.opsForHash();
-        this.messagingTemplate = messagingTemplate;
     }
 
-    // 채팅 메세지 저장(Redis)
-    public ChatMessage sendAndSaveMessage(ChatMessage chatMessage) {
+/**
+ * 메세지 저장
+ * */
+    public ChatMessage SaveMessage(ChatMessage chatMessage) {
+
+        if(chatMessage == null || chatMessage.getChannelId() == null || chatMessage.getContent() == null) {
+            throw new ChatException(ChatErrorCode.INVALID_MESSAGE_CONTENT);
+        }
+        // 새로운 메시지 ID 생성
         String messageId = createNewMessageId(chatMessage.getChannelId());
         chatMessage.setId(messageId);
         chatMessage.setCreatedTime(LocalDateTime.now());
 
-        hashOperations.put(chatMessage.getChannelId(), messageId, chatMessage);
+        String messageKey = "message:" + chatMessage.getChannelId() + ":" + messageId;
+        String channelKey = "channel:" + chatMessage.getChannelId();
+
+
+        redisTemplate.opsForValue().set(messageKey, chatMessage, MESSAGE_TTL, TimeUnit.SECONDS);
+        redisTemplate.opsForList().rightPush(channelKey, chatMessage);
+        redisTemplate.expire(channelKey, MESSAGE_TTL, TimeUnit.SECONDS);
+
+
         return chatMessage;
     }
 
-     // 채팅방의 모든 메세지 조회
-    public List<ChatMessage> getAllMessages(String channelId) {
-        // channelId 에 대한 collection으로 반환되는 값들을 List로 반환
-        return new ArrayList<>(hashOperations.values(channelId));
+    /**
+     * 특정 채널의 모든 메시지를 조회
+     * @param channelId 조회할 채널의 ID
+     * @return 해당 채널의 모든 메시지 리스트
+     */
+    public List<ChatMessage> getAllMessagesInChannel(String channelId) {
 
+        if(channelId == null) {
+            throw new ChatException(ChatErrorCode.CHANNEL_NOT_FOUND);
+        }
+        String channelKey = "channel:" + channelId;
+        List<ChatMessage> messages = redisTemplate.opsForList().range(channelKey, 0, -1);
 
-    }
-
-    // 특정 사용자의 메세지 조회
-    public List<ChatMessage> getMessagesByUserId(String channelId, String userId) {
-        Map<String, ChatMessage> messagesMap = hashOperations.entries(channelId);
-
-        List<ChatMessage> userMessages = new ArrayList<>();
-        for (ChatMessage message : messagesMap.values()) {
-            //  senderId와 userId가 같은 경우 해당하는 메세지 추가
-            if (message.getSenderId().equals(userId)) {
-                userMessages.add(message);
-            }
+        if(messages == null ||  messages.isEmpty()) {
+            throw new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND);
         }
 
-        return userMessages;
+        return messages;
+    }
+
+    /**
+     * 특정 사용자가 특정 채널에서 보낸 메시지를 조회
+     * @param channelId 조회할 채널의 ID
+     * @param senderId 조회할 사용자의 ID
+     * @return 해당 사용자가 해당 채널에서 보낸 모든 메시지 리스트
+     */
+    public List<ChatMessage> getMessagesBySender(String channelId, String senderId) {
+        List<ChatMessage> allMessages = getAllMessagesInChannel(channelId);
+        return allMessages.stream()
+                .filter(message -> message.getSenderId().equals(senderId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 특정 메시지를 수정
+     * @param channelId 메시지가 속한 채널의 ID
+     * @param messageId 수정할 메시지의 ID
+     * @param newContent 새로운 메시지 내용
+     * @return 수정된 메시지 객체. 메시지가 존재하지 않으면 null 반환
+     */
+    public ChatMessage updateMessage(String channelId, String messageId, String newContent) {
+
+        if (channelId == null || messageId == null || newContent == null || newContent.trim().isEmpty()) {
+            throw new ChatException(ChatErrorCode.INVALID_MESSAGE_CONTENT);
+        }
+
+        String channelKey = "channel:" + channelId;
+        List<ChatMessage> messages = redisTemplate.opsForList().range(channelKey, 0, -1);
+
+        for (int i = 0; i < messages.size(); i++) {
+            ChatMessage message = messages.get(i);
+            if (message.getId().equals(messageId)) {
+                message.updateContent(newContent);
+                redisTemplate.opsForList().set(channelKey, i, message);
+                return message;
+            }
+        }
+        // 메세지를 찾지 못한 경우 예외발생
+        throw new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND);
 
     }
 
+    /**
+     * 특정 메시지를 삭제
+     * @param channelId 메시지가 속한 채널의 ID
+     * @param messageId 삭제할 메시지의 ID
+     * @return 삭제된 메시지 객체. 메시지가 존재하지 않으면 null 반환
+     */
+    public ChatMessage deleteMessage(String channelId, String messageId) {
+        String channelKey = "channel:" + channelId;
+        String messageKey = "message:" + channelId + ":" + messageId;
 
-    // 최근 메세지 50개 조회
+        // 개별 메시지 삭제
+        ChatMessage deletedMessage = redisTemplate.opsForValue().get(messageKey);
+
+        if (deletedMessage == null) {
+            throw new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND);
+        }
+
+        // 채널 리스트에서 메시지 삭제
+        redisTemplate.delete(messageKey);
+        redisTemplate.opsForList().remove(channelKey, 1, deletedMessage);
+
+        return deletedMessage;
+    }
+
+    /**
+     * 특정 채널의 최근 메시지 50개 조회
+     * @param channelId 조회할 채널의 ID
+     * @return 최근 메시지 50개 리스트
+     */
     public List<ChatMessage> getRecentMessages(String channelId) {
-        // getAllMessages 메서드를 이용 -> 모든 메세지 조회
-        List<ChatMessage> allMessages = getAllMessages(channelId);
 
-        List<ChatMessage> recentMessages = new ArrayList<>();
-
-        // 생성 시간 기준으로 정렬
-        // 최신 메세지가 리스트 앞에 위치
-        Collections.sort(allMessages, new Comparator<ChatMessage>() {
-            @Override
-            public int compare(ChatMessage o1, ChatMessage o2) {
-                return o2.getCreatedTime().compareTo(o1.getCreatedTime());
-            }
-        });
-
-        int messageCount = Math.min(allMessages.size(), 50);
-        for (int i = 0; i < messageCount; i++) {
-            recentMessages.add(allMessages.get(i));
+        if (channelId == null) {
+            throw new ChatException(ChatErrorCode.CHANNEL_NOT_FOUND);
         }
 
-        return recentMessages;
+        String channelKey = "channel:" + channelId;
+        long size = redisTemplate.opsForList().size(channelKey);
+        // 메시지가 없는 경우 빈 리스트를 반환
+        if (size == 0) {
+            return new ArrayList<>();
+        }
 
-
+        return redisTemplate.opsForList().range(channelKey, Math.max(0, size - 50), -1);
     }
 
 
-    // 특정 메세지 수정
-    // 예외 처리 필요
-    public ChatMessage updatedMessage(String channelId, String messageId, String newContent) {
-        ChatMessage updatedMessage = hashOperations.get(channelId, messageId);
-        updatedMessage.updateContent(newContent);
-        hashOperations.put(channelId, messageId, updatedMessage);
-
-        return updatedMessage;
-    }
-
-    // 특정 메세지 삭제
-    public Long deleteMessage(String channelId, String messageId) {
-        //성공하면 1, 실패하면 0 반환
-        // 예외처리 해줘야함
-        return hashOperations.delete(channelId, messageId);
-    }
 
 
-    // 메세지 아이디 생성 -> 채팅채널 ID + UUID
+
+
+
+    // 새 메시지 ID 생성 메서드
     private String createNewMessageId(String channelId) {
         String fiveUuid = UUID.randomUUID().toString().substring(0, 5);
         String fourChannelId = String.format("%04d", Integer.parseInt(channelId) % 10000);
         return fourChannelId + fiveUuid;
     }
 
-}
+    }
