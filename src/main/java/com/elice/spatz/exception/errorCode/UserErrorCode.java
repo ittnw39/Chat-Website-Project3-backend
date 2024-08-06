@@ -14,6 +14,7 @@ public enum UserErrorCode implements ErrorCode {
     EMAIL_VERIFICATION_NOT_COMPLETE(HttpStatus.UNAUTHORIZED, "이메일 인증이 완료되지 않았습니다."),
     NICKNAME_ALREADY_IN_USE(HttpStatus.CONFLICT, "이미 사용 중인 사용자 닉네임입니다.");
 
+
     private final HttpStatus status;
     private final String message;
 

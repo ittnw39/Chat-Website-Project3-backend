@@ -42,8 +42,8 @@ public class SecurityConfig {
     String[] urlsToBePermittedAll = {"/hello", "/login", "/h2-console/**", "/**", "/files/**"};
 
     // 인증 과정이 필요하여
-    // 인증 없이 요청한 경우 로그인 페이지로 리다이렉션 합니다.
-    String[] urlsToBeAuthenticated = {"/logout"};
+    // 인증 없이 요청한 경우 401 Error 반환
+    String[] urlsToBeAuthenticated = {"/logout", "/users/password/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -86,7 +86,6 @@ public class SecurityConfig {
                 .exceptionHandling(ehc -> ehc
                         .accessDeniedHandler(new CustomAccessDeniedHandler()))
                 // OAuth 이용한 로그인 시 기본 설정.
-                .oauth2Login(Customizer.withDefaults())
                 .logout(withDefaults());
 
         return http.build();

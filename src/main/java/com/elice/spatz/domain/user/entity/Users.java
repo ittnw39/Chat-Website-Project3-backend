@@ -61,4 +61,8 @@ public class Users {
     // 정지
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private BannedUser bannedUser;
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
 }
