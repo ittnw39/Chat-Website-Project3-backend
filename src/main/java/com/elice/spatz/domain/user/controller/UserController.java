@@ -29,15 +29,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    @GetMapping("/precheck-email")
-    public ResponseEntity<UserRegisterResultDto> processRegister(@RequestParam String email) {
-
-        boolean result = userService.preCheckEmail(email);
-        HttpStatus code = result ? HttpStatus.OK : HttpStatus.CONFLICT;
-
-        return ResponseEntity.status(code)
-                .body(new UserRegisterResultDto(result, null));
-    }
 
     @PostMapping("/apiLogin")
     public ResponseEntity<SignInResponse> apiLogin(@RequestBody SignInRequest signInRequest) {
@@ -46,6 +37,15 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(signInResponse);
+    }
+
+    @PatchMapping("/users/password")
+    public ResponseEntity<String> updateUserInformation(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody PasswordChangeRequest passwordChangeRequest) {
+
+        userService.changePassword(customUserDetails.getId(), passwordChangeRequest);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
 }
