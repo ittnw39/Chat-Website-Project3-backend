@@ -85,8 +85,6 @@ public class SecurityConfig {
                 // 403 Forbidden Error 발생 시 어떠한 루틴이 실행될 것인가 설정.
                 .exceptionHandling(ehc -> ehc
                         .accessDeniedHandler(new CustomAccessDeniedHandler()))
-                // OAuth 이용한 로그인 시 기본 설정.
-                .oauth2Login(Customizer.withDefaults())
                 .logout(withDefaults());
 
         return http.build();
