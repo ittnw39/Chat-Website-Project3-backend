@@ -21,17 +21,16 @@ public class ChatService {
 
     private final RedisTemplate<String, ChatMessage> redisTemplate;
 
-    @Autowired
     public ChatService(RedisTemplate<String, ChatMessage> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-/**
- * 메세지 저장
- * */
+    /**
+     * 메세지 저장
+     */
     public ChatMessage SaveMessage(ChatMessage chatMessage) {
 
-        if(chatMessage == null || chatMessage.getChannelId() == null || chatMessage.getContent() == null) {
+        if (chatMessage == null || chatMessage.getChannelId() == null || chatMessage.getContent() == null) {
             throw new ChatException(ChatErrorCode.INVALID_MESSAGE_CONTENT);
         }
         // 새로운 메시지 ID 생성
@@ -53,18 +52,19 @@ public class ChatService {
 
     /**
      * 특정 채널의 모든 메시지를 조회
+     *
      * @param channelId 조회할 채널의 ID
      * @return 해당 채널의 모든 메시지 리스트
      */
     public List<ChatMessage> getAllMessagesInChannel(String channelId) {
 
-        if(channelId == null) {
+        if (channelId == null) {
             throw new ChatException(ChatErrorCode.CHANNEL_NOT_FOUND);
         }
         String channelKey = "channel:" + channelId;
         List<ChatMessage> messages = redisTemplate.opsForList().range(channelKey, 0, -1);
 
-        if(messages == null ||  messages.isEmpty()) {
+        if (messages == null || messages.isEmpty()) {
             throw new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND);
         }
 
@@ -73,8 +73,9 @@ public class ChatService {
 
     /**
      * 특정 사용자가 특정 채널에서 보낸 메시지를 조회
+     *
      * @param channelId 조회할 채널의 ID
-     * @param senderId 조회할 사용자의 ID
+     * @param senderId  조회할 사용자의 ID
      * @return 해당 사용자가 해당 채널에서 보낸 모든 메시지 리스트
      */
     public List<ChatMessage> getMessagesBySender(String channelId, String senderId) {
@@ -86,8 +87,9 @@ public class ChatService {
 
     /**
      * 특정 메시지를 수정
-     * @param channelId 메시지가 속한 채널의 ID
-     * @param messageId 수정할 메시지의 ID
+     *
+     * @param channelId  메시지가 속한 채널의 ID
+     * @param messageId  수정할 메시지의 ID
      * @param newContent 새로운 메시지 내용
      * @return 수정된 메시지 객체. 메시지가 존재하지 않으면 null 반환
      */
@@ -115,6 +117,7 @@ public class ChatService {
 
     /**
      * 특정 메시지를 삭제
+     *
      * @param channelId 메시지가 속한 채널의 ID
      * @param messageId 삭제할 메시지의 ID
      * @return 삭제된 메시지 객체. 메시지가 존재하지 않으면 null 반환
@@ -139,6 +142,7 @@ public class ChatService {
 
     /**
      * 특정 채널의 최근 메시지 50개 조회
+     *
      * @param channelId 조회할 채널의 ID
      * @return 최근 메시지 50개 리스트
      */
@@ -158,12 +162,6 @@ public class ChatService {
         return redisTemplate.opsForList().range(channelKey, Math.max(0, size - 50), -1);
     }
 
-
-
-
-
-
-
     // 새 메시지 ID 생성 메서드
     private String createNewMessageId(String channelId) {
         String fiveUuid = UUID.randomUUID().toString().substring(0, 5);
@@ -171,4 +169,4 @@ public class ChatService {
         return fourChannelId + fiveUuid;
     }
 
-    }
+}
