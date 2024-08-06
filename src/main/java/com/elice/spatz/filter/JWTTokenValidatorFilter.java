@@ -1,6 +1,9 @@
 package com.elice.spatz.filter;
 
+import com.elice.spatz.config.CustomUserDetails;
 import com.elice.spatz.constants.ApplicationConstants;
+import com.elice.spatz.domain.user.entity.Users;
+import com.elice.spatz.domain.user.repository.UserRepository;
 import com.elice.spatz.domain.user.service.TokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -35,6 +38,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     private boolean isExecutedBefore = false;
 
     private final TokenProvider tokenProvider;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -52,12 +56,17 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
                 // 토큰 페이로드 추출
                 Map payloadFromJWTToken = tokenProvider.getPayloadFromJWTToken(accessToken);
 
-                String username = String.valueOf(payloadFromJWTToken.get("username"));
-                String authorities = String.valueOf(payloadFromJWTToken.get("authorities"));
+                Long userId = Long.parseLong(String.valueOf(payloadFromJWTToken.get("userId")));
+                Users user = userRepository.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
 
-                // 인증을 마치고 인증정보를 SecurityContext에 담는 과정
-                Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
-                        AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+                CustomUserDetails principal = new CustomUserDetails(userId, user.getEmail(), user.getPassword(), user.getRole());
+
+
+                // 인증을 마치고 인증에 성공한 유저의 정보를 Security Context 에 담는 과정
+                // 여기서 첫 번째의 인자로 주입되는 principal 이, @AuthenticationPrincipal 을 통해 주입되는 사용자 정보이다.
+                Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
+                        AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 

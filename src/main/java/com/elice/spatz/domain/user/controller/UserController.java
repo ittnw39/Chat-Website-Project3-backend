@@ -1,10 +1,12 @@
 package com.elice.spatz.domain.user.controller;
 
+import com.elice.spatz.config.CustomUserDetails;
 import com.elice.spatz.domain.user.dto.*;
 import com.elice.spatz.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,5 +47,19 @@ public class UserController {
                 .body(signInResponse);
     }
 
+    @GetMapping("/test")
+    public String test(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        System.out.println("customUserDetails = " + customUserDetails);
+        Long id = customUserDetails.getId();
+        System.out.println("id = " + id);
+        String email = customUserDetails.getEmail();
+        System.out.println("email = " + email);
+        String role = customUserDetails.getRole();
+        System.out.println("role = " + role);
+        String password = customUserDetails.getPassword();
+        System.out.println("password = " + password);
+
+        return "srt";
+    }
 
 }
