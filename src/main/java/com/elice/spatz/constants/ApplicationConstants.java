@@ -7,7 +7,7 @@ public final class ApplicationConstants {
     public static final String JWT_HEADER = "Authorization";
 
     // Access Token Expiration time : 30 minutes
-    public static final Long ACCESS_TOKEN_EXPIRATION = 180000L;
+    public static final Long ACCESS_TOKEN_EXPIRATION = 1800000L;
     // Refresh Token Expiration time : 24 hours
     public static final Long REFRESH_TOKEN_EXPIRATION = 86400000L;
     // Refresh Token ReIssue limit : 5

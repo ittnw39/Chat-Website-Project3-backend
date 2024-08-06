@@ -2,6 +2,8 @@ package com.elice.spatz.exception.handler;
 
 import com.booksajo.bookPanda.exception.dto.ErrorResponse;
 import com.elice.spatz.exception.ErrorCode;
+import com.elice.spatz.exception.dto.UserErrorResponse;
+import com.elice.spatz.exception.errorCode.UserErrorCode;
 import com.elice.spatz.exception.exception.ChatException;
 import com.elice.spatz.exception.exception.ServerException;
 import com.elice.spatz.exception.exception.UserException;
@@ -21,10 +23,13 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(UserException.class)
-    public ResponseEntity<String> handleUserException(UserException ex)
+    public ResponseEntity<UserErrorResponse> handleUserException(UserException ex)
     {
-        ErrorCode errorCode = ex.getUserErrorCode();
-        return ResponseEntity.status(errorCode.getHttpStatus()).body(errorCode.getMessage());
+        UserErrorCode errorCode = ex.getUserErrorCode();
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(new UserErrorResponse(errorCode.getHttpStatus().toString().split(" ")[0],
+                        errorCode.getCode(),
+                        errorCode.getMessage()));
     }
 
     @ExceptionHandler(ServerException.class)
