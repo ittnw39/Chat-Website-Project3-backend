@@ -74,12 +74,16 @@ public class UserService {
     }
 
     public UserRegisterResultDto register(UserRegisterDto userRegisterDto) {
-        Users newUser = new Users(userRegisterDto.getEmail(),
+        Users newUser = new Users(
+                userRegisterDto.getEmail(),
                 userRegisterDto.getPassword(),
                 userRegisterDto.getNickname(),
                 null,
+                userRegisterDto.isMarketingAgreed(),
                 false,
-                "user", true);
+                "user",
+                true
+        );
 
         userRepository.save(newUser);
 

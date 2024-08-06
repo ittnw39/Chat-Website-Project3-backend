@@ -18,8 +18,9 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
 
-    @PostMapping("/register")
-    public ResponseEntity<UserRegisterResultDto> processRegister(@RequestBody UserRegisterDto userRegisterDto) {
+    // 회원 가입 처리
+    @PostMapping("/users")
+    public ResponseEntity<UserRegisterResultDto> register(@RequestBody UserRegisterDto userRegisterDto) {
         String hashedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
         userRegisterDto.setPassword(hashedPassword);
 
@@ -45,21 +46,6 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(signInResponse);
-    }
-
-    @GetMapping("/test")
-    public String test(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        System.out.println("customUserDetails = " + customUserDetails);
-        Long id = customUserDetails.getId();
-        System.out.println("id = " + id);
-        String email = customUserDetails.getEmail();
-        System.out.println("email = " + email);
-        String role = customUserDetails.getRole();
-        System.out.println("role = " + role);
-        String password = customUserDetails.getPassword();
-        System.out.println("password = " + password);
-
-        return "srt";
     }
 
 }

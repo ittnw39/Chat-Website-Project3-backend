@@ -1,5 +1,5 @@
 --users Table
-INSERT INTO users (id, email, password, nickname, last_login, is_on_connection, role, is_activated)
+INSERT INTO users (id, email, password, nickname, last_login, connected, marketing_agreed, role, activated)
 values (
         11111,
         'admin@elice.com',
@@ -7,10 +7,11 @@ values (
         'nickname',
         '2024-07-31 15:30:00',
         TRUE,
+        TRUE,
         'admin',
         TRUE);
 
-INSERT INTO users (id, email, password, nickname, last_login, is_on_connection, role, is_activated)
+INSERT INTO users (id, email, password, nickname, last_login, connected, marketing_agreed, role, activated)
 values (
         22222,
         'test@elice.com',
@@ -18,6 +19,6 @@ values (
         'nickname',
         '2024-07-31 15:30:00',
         TRUE,
+        TRUE,
         'user',
         TRUE);
-

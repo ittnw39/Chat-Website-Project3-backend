@@ -2,9 +2,7 @@ package com.elice.spatz.domain.user.entity;
 
 import com.elice.spatz.domain.userfeature.model.entity.*;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name="users")
-@NoArgsConstructor
+@NoArgsConstructor()
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,18 +21,20 @@ public class Users {
     private String password;
     private String nickname;
     private LocalDateTime lastLogin;
-    private boolean isOnConnection;
+    private boolean marketingAgreed;
+    private boolean connected;
     private String role;
-    private boolean isActivated;
+    private boolean activated;
 
-    public Users(String email, String password, String nickname, LocalDateTime lastLogin, boolean isOnConnection, String role, boolean isActivated) {
+    public Users(String email, String password, String nickname, LocalDateTime lastLogin, boolean marketingAgreed, boolean connected, String role, boolean activated) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.lastLogin = lastLogin;
-        this.isOnConnection = isOnConnection;
+        this.marketingAgreed = marketingAgreed;
+        this.connected = connected;
         this.role = role;
-        this.isActivated = isActivated;
+        this.activated = activated;
     }
 
     // 친구 요청
