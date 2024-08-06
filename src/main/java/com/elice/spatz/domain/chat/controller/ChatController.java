@@ -43,7 +43,7 @@ public class ChatController {
      */
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload ChatMessage chatMessage) {
-        ChatMessage savedMessage = chatService.sendAndSaveMessage(chatMessage);
+        ChatMessage savedMessage = chatService.SaveMessage(chatMessage);
         messagingTemplate.convertAndSend("/topic/chat/" + chatMessage.getChannelId(), savedMessage);
     }
 
@@ -65,13 +65,13 @@ public class ChatController {
     /**
      * 클라이언트에서 삭제요청 db에서 삭제 후 -> 브로드캐스트
      */
-    @MessageMapping("/chat/delete")
-    public void deleteMessage(@Payload ChatMessage chatMessage) {
-        Long result = chatService.deleteMessage(chatMessage.getChannelId(), chatMessage.getId());
-
-        if(result > 0) {
-            messagingTemplate.convertAndSend("/topic/chat/" + chatMessage.getChannelId() + "/delete", chatMessage);
-        }
+//    @MessageMapping("/chat/delete")
+//    public void deleteMessage(@Payload ChatMessage chatMessage) {
+////        Long result = chatService.deleteMessage(chatMessage.getChannelId(), chatMessage.getId());
+//
+//        if(result > 0) {
+//            messagingTemplate.convertAndSend("/topic/chat/" + chatMessage.getChannelId() + "/delete", chatMessage);
+//        }
 
 
     }
