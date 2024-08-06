@@ -9,6 +9,8 @@ import com.elice.spatz.domain.user.entity.UserRefreshToken;
 import com.elice.spatz.domain.user.entity.Users;
 import com.elice.spatz.domain.user.repository.UserRefreshTokenRepository;
 import com.elice.spatz.domain.user.repository.UserRepository;
+import com.elice.spatz.exception.errorCode.UserErrorCode;
+import com.elice.spatz.exception.exception.UserException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -74,6 +76,18 @@ public class UserService {
     }
 
     public UserRegisterResultDto register(UserRegisterDto userRegisterDto) {
+
+        // 이미 사용 중인 이메일일 경우에는 예외 반환
+        userRepository.findByEmail(userRegisterDto.getEmail()).ifPresent(user -> {
+            throw new UserException(UserErrorCode.EMAIL_ALREADY_IN_USE);
+        });
+
+        // 이미 사용 중인 닉네임일 경우에는 예외 반환
+        userRepository.findByNickname(userRegisterDto.getNickname()).ifPresent(user -> {
+            throw new UserException(UserErrorCode.NICKNAME_ALREADY_IN_USE);
+        });
+
+
         Users newUser = new Users(
                 userRegisterDto.getEmail(),
                 userRegisterDto.getPassword(),
@@ -88,12 +102,6 @@ public class UserService {
         userRepository.save(newUser);
 
         return new UserRegisterResultDto(true, null);
-    }
-
-    // 이미 입력한 이메일에 해당하는 사용자가 존재하면 false 반환 >> 실패의 의미
-    // 이미 입력한 이메일에 해당하는 사용자가 없다면 true 반환 >> 성공의 의미
-    public boolean preCheckEmail(String email) {
-        return userRepository.findUsersByEmail(email).isEmpty();
     }
 
 }
