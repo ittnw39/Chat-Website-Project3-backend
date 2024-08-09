@@ -22,6 +22,8 @@ build:
   stage: build
   script:
 #    - java -version  # Java 설치 확인
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - export PATH=$JAVA_HOME/bin:$PATH
     - ./gradlew clean build
   artifacts:
     paths:
