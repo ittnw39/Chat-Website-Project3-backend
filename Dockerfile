@@ -1,63 +1,29 @@
-FROM eclipse-temurin:17-jdk-jammy
+FROM gradle:8.8.0-jdk17 as builder
+WORKDIR /build
 
-CMD ["gradle"]
+# Gradle 파일 복사 및 빌드 의존성 다운로드
+COPY build.gradle settings.gradle /build/
+RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
 
-ENV GRADLE_HOME /opt/gradle
+# 애플리케이션 빌드
+COPY . /build
+RUN gradle build -x test --parallel
 
-RUN set -o errexit -o nounset \
-    && echo "Adding gradle user and group" \
-    && groupadd --system --gid 1000 gradle \
-    && useradd --system --gid gradle --uid 1000 --shell /bin/bash --create-home gradle \
-    && mkdir /home/gradle/.gradle \
-    && chown --recursive gradle:gradle /home/gradle \
-    \
-    && echo "Symlinking root Gradle cache to gradle Gradle cache" \
-    && ln --symbolic /home/gradle/.gradle /root/.gradle
+# 애플리케이션 실행 환경 설정 (JDK 17 사용)
+FROM openjdk:17.0-slim
+WORKDIR /app
 
-VOLUME /home/gradle/.gradle
+# 빌더 이미지에서 JAR 파일 복사
+COPY --from=builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
 
-WORKDIR /home/gradle
+EXPOSE 8080
 
-RUN set -o errexit -o nounset \
-    && apt-get update \
-    && apt-get install --yes --no-install-recommends \
-        unzip \
-        wget \
-        \
-        bzr \
-        git \
-        git-lfs \
-        mercurial \
-        openssh-client \
-        subversion \
-    && rm --recursive --force /var/lib/apt/lists/* \
-    \
-    && echo "Testing VCSes" \
-    && which bzr \
-    && which git \
-    && which git-lfs \
-    && which hg \
-    && which svn
-
-ENV GRADLE_VERSION 8.9
-ARG GRADLE_DOWNLOAD_SHA256=d725d707bfabd4dfdc958c624003b3c80accc03f7037b5122c4b1d0ef15cecab
-RUN set -o errexit -o nounset \
-    && echo "Downloading Gradle" \
-    && wget --no-verbose --output-document=gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
-    \
-    && echo "Checking Gradle download hash" \
-    && echo "${GRADLE_DOWNLOAD_SHA256} *gradle.zip" | sha256sum --check - \
-    \
-    && echo "Installing Gradle" \
-    && unzip gradle.zip \
-    && rm gradle.zip \
-    && mv "gradle-${GRADLE_VERSION}" "${GRADLE_HOME}/" \
-    && ln --symbolic "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle
-
-USER gradle
-
-RUN set -o errexit -o nounset \
-    && echo "Testing Gradle installation" \
-    && gradle --version
-
-USER root
+# root 대신 nobody 권한으로 실행
+USER nobody
+ENTRYPOINT [                                                \
+    "java",                                                 \
+    "-jar",                                                 \
+    "-Djava.security.egd=file:/dev/./urandom",              \
+    "-Dsun.net.inetaddr.ttl=0",                             \
+    "app.jar"                                               \
+]

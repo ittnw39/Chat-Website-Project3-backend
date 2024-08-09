@@ -1,43 +1,13 @@
-image: daeheekang/docker-official-image:latest
-
 stages:
-  - build
-  - test
-  - deploy
+  - dockerbuild-push
 
-cache:
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-
-build:
-  stage: build
-  script:
-    - whoami  # 현재 사용자 확인
-    - java -version  # Java 설치 확인
-    - ./gradlew clean build
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 week
-
-# test:
-#   stage: test
-#   script:
-#     - ./gradlew test
-
-deploy-to-ec2:
-  stage: deploy
+package:
+  image: docker:latest
+  stage: dockerbuild-push
+  services:
+    - docker:dind
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - docker login registry.gitlab.com -u $GITLAB_USER -p $GITLAB_PASSWORD
   script:
-    - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" 'rm -f ~/test-springboot-server/build/libs/*.jar'
-    - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" 'mkdir -p ~/test-springboot-server/build/libs'
-    - scp build/libs/*.jar ubuntu@"$DEPLOY_SERVER":~/test-springboot-server/build/libs/
-    - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" '~/test-springboot-server/test-cd.sh'
+    - docker build -t registry.gitlab.com/$GITLAB_USER/gi .
+    - docker push registry.gitlab.com/$GITLAB_USER/$PROJECT_NAME
