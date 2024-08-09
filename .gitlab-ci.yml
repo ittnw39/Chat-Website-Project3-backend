@@ -1,4 +1,4 @@
-image: java:17-jdk
+image: my-java-image
 
 services:
   - docker:dind
