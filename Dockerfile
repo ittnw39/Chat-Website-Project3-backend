@@ -1,21 +1,63 @@
-# Ubuntu 기반의 이미지를 사용
-FROM ubuntu:20.04
+FROM eclipse-temurin:17-jdk-jammy
 
-# 필수 패키지 업데이트 및 설치
-RUN apt-get update && apt-get install -y \
-    software-properties-common \
-    && add-apt-repository ppa:openjdk-r/ppa \
-    && apt-get update
+CMD ["gradle"]
 
-# Java 17 설치
-RUN apt-get install -y openjdk-17-jdk
+ENV GRADLE_HOME /opt/gradle
 
-# JAVA_HOME 환경 변수 설정
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH $JAVA_HOME/bin:$PATH
+RUN set -o errexit -o nounset \
+    && echo "Adding gradle user and group" \
+    && groupadd --system --gid 1000 gradle \
+    && useradd --system --gid gradle --uid 1000 --shell /bin/bash --create-home gradle \
+    && mkdir /home/gradle/.gradle \
+    && chown --recursive gradle:gradle /home/gradle \
+    \
+    && echo "Symlinking root Gradle cache to gradle Gradle cache" \
+    && ln --symbolic /home/gradle/.gradle /root/.gradle
 
-# Java 설치 확인
-RUN java -version
+VOLUME /home/gradle/.gradle
 
-# 기본 명령어 설정 (필요에 따라 변경)
-CMD ["bash"]
+WORKDIR /home/gradle
+
+RUN set -o errexit -o nounset \
+    && apt-get update \
+    && apt-get install --yes --no-install-recommends \
+        unzip \
+        wget \
+        \
+        bzr \
+        git \
+        git-lfs \
+        mercurial \
+        openssh-client \
+        subversion \
+    && rm --recursive --force /var/lib/apt/lists/* \
+    \
+    && echo "Testing VCSes" \
+    && which bzr \
+    && which git \
+    && which git-lfs \
+    && which hg \
+    && which svn
+
+ENV GRADLE_VERSION 8.9
+ARG GRADLE_DOWNLOAD_SHA256=d725d707bfabd4dfdc958c624003b3c80accc03f7037b5122c4b1d0ef15cecab
+RUN set -o errexit -o nounset \
+    && echo "Downloading Gradle" \
+    && wget --no-verbose --output-document=gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+    \
+    && echo "Checking Gradle download hash" \
+    && echo "${GRADLE_DOWNLOAD_SHA256} *gradle.zip" | sha256sum --check - \
+    \
+    && echo "Installing Gradle" \
+    && unzip gradle.zip \
+    && rm gradle.zip \
+    && mv "gradle-${GRADLE_VERSION}" "${GRADLE_HOME}/" \
+    && ln --symbolic "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle
+
+USER gradle
+
+RUN set -o errexit -o nounset \
+    && echo "Testing Gradle installation" \
+    && gradle --version
+
+USER root

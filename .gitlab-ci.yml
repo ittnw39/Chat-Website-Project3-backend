@@ -1,4 +1,4 @@
-image: openjdk:17-jdk
+image: daeheekang/docker-official-image:latest
 
 services:
   - docker:dind
