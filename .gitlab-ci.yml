@@ -1,5 +1,10 @@
 image: java:17-jdk
 
+image: docker:latest
+
+services:
+  - docker:dind
+
 
 variables:
   DOCKER_DRIVER: overlay2
