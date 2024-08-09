@@ -22,6 +22,10 @@ cache:
 build:
   stage: build
   script:
+    - echo "Setting JAVA_HOME"
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - export PATH=$JAVA_HOME/bin:$PATH
+    - java -version  # Java가 올바르게 설치되고 환경 변수가 설정되었는지 확인
     - ./gradlew clean build
   artifacts:
     paths:
