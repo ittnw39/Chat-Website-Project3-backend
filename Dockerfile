@@ -1,29 +1,25 @@
-FROM gradle:8.8.0-jdk17 as builder
-WORKDIR /build
+# 베이스 이미지로 ubuntu를 사용합니다.
+FROM ubuntu:20.04
 
-# Gradle 파일 복사 및 빌드 의존성 다운로드
-COPY build.gradle settings.gradle /build/
-RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+# 불필요한 경고 메시지를 방지하기 위해 환경변수를 설정합니다.
+ENV DEBIAN_FRONTEND=noninteractive
 
-# 애플리케이션 빌드
-COPY . /build
-RUN gradle build -x test --parallel
+# 필요한 패키지를 설치하고 OpenJDK 17을 설치합니다.
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:openjdk-r/ppa && \
+    apt-get update && \
+    apt-get install -y openjdk-17-jdk
 
-# 애플리케이션 실행 환경 설정 (JDK 17 사용)
-FROM openjdk:17.0-slim
+# Java의 환경변수를 설정합니다.
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH $JAVA_HOME/bin:$PATH
+
+# 작업 디렉토리를 설정
 WORKDIR /app
 
-# 빌더 이미지에서 JAR 파일 복사
-COPY --from=builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
+# 파일 복사
+COPY /build/libs/spatz-0.0.1-SNAPSHOT.jar spatz.jar
 
-EXPOSE 8080
-
-# root 대신 nobody 권한으로 실행
-USER nobody
-ENTRYPOINT [                                                \
-    "java",                                                 \
-    "-jar",                                                 \
-    "-Djava.security.egd=file:/dev/./urandom",              \
-    "-Dsun.net.inetaddr.ttl=0",                             \
-    "app.jar"                                               \
-]
+# 커맨드 실행
+CMD ["java", "-jar", "spatz.jar"]
