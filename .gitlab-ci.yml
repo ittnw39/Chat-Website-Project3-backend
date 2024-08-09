@@ -30,7 +30,9 @@ build:
 
 test: 
     stage: test
-    script: ./gradlew test
+    script:
+        - sudo systemctl start docker 
+        - ./gradlew test
 
 deploy-to-ec2:
     stage: deploy
