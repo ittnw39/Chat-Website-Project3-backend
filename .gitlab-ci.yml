@@ -1,5 +1,13 @@
 image: java:17-jdk
 
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_VERIFY: "1"
+
+
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
