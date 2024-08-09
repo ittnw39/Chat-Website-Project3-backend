@@ -1,4 +1,4 @@
-image: daeheekang/my-java-image:latest
+image: openjdk:17-jdk
 
 services:
   - docker:dind
