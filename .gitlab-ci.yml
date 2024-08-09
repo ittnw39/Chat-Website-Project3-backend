@@ -5,7 +5,7 @@ services:
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2345
+  DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_TLS_VERIFY: "1"
 
@@ -22,22 +22,18 @@ cache:
 build:
   stage: build
   script:
-    - echo "Setting JAVA_HOME"
-    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-    - export PATH=$JAVA_HOME/bin:$PATH
     - java -version  # Java가 올바르게 설치되고 환경 변수가 설정되었는지 확인
     - ./gradlew clean build
   artifacts:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
-  only:
-    - main
 
-test:
-  stage: test
-  script:
-    - ./gradlew test
+
+# test:
+#   stage: test
+#   script:
+#     - ./gradlew test
 
 deploy-to-ec2:
   stage: deploy
@@ -52,5 +48,5 @@ deploy-to-ec2:
   script:
     - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" 'rm -f ~/test-springboot-server/build/libs/*.jar'
     - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" 'mkdir -p ~/test-springboot-server/build/libs'
-    - scp build/libs/*.jar ubuntu@"$DEPLOY_SERVER":~/test-springboot-server/build/libs/*.jar
+    - scp build/libs/*.jar ubuntu@"$DEPLOY_SERVER":~/test-springboot-server/build/libs/
     - ssh -o StrictHostKeyChecking=no ubuntu@"$DEPLOY_SERVER" '~/test-springboot-server/test-cd.sh'
