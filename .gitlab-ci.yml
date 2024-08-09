@@ -8,13 +8,19 @@ stages:
   - build
   - test
 
-before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
 
 build:
   stage: build
+  image: gradle:7.6-jdk17
+  before_script:
+    - echo `pwd`
+    - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
-    - gradle clean build
+    - gradle wrapper
+    - ./gradlew assemble
+    - ls
   artifacts:
+    when: always
     paths:
       - build/libs/*.jar
+    expire_in: 1 week
