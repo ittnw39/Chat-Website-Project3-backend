@@ -1,12 +1,4 @@
-image: jdk17-graal
-
-services:
-  - docker:dind
-
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
+image: daeheekang/docker-official-image:latest
 
 stages:
   - build
@@ -21,15 +13,13 @@ cache:
 build:
   stage: build
   script:
-#    - java -version  # Java 설치 확인
-    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-    - export PATH=$JAVA_HOME/bin:$PATH
+    - whoami  # 현재 사용자 확인
+    - java -version  # Java 설치 확인
     - ./gradlew clean build
   artifacts:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
-
 
 # test:
 #   stage: test
