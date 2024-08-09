@@ -1,7 +1,7 @@
 stages:
   - build
 
-
+privileged: true
 build:
   stage: build
   image: docker:latest
