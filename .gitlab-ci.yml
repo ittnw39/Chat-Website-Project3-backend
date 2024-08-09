@@ -21,7 +21,7 @@ cache:
 build:
   stage: build
   script:
-    - java -version  # Java 설치 확인
+#    - java -version  # Java 설치 확인
     - ./gradlew clean build
   artifacts:
     paths:
