@@ -1,5 +1,7 @@
 # SPATZ
-로고
+![spatz-logo](/uploads/75c80f561531b5ab9b89070626774286/spatz-logo.png)
+<br>
+
 
 ## 팀 소개
 - 엘리스 Cloud 트랙 3기 6팀
@@ -55,12 +57,12 @@
     <img src="https://img.shields.io/badge/openjdk-000000?style=for-the-badge&logo=openjdk&logoColor=white">
     <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
     <img src="https://img.shields.io/badge/springsecurity-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white">
-    <img src="https://img.shields.io/badge/websocket-FEEA3F?style=for-the-badge&logoColor=white">  </div>
 <div>
     <img src="https://img.shields.io/badge/redis-FF4438?style=for-the-badge&logo=redis&logoColor=white">
     <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
     <img src="https://img.shields.io/badge/nginx-009639?style=for-the-nginx&logo=nginx&logoColor=white">
     <img src="https://img.shields.io/badge/runner-FC6D26?style=for-the-badge&logoColor=white">
+    <img src="https://img.shields.io/badge/websocket-FEEA3F?style=for-the-badge&logoColor=white">  </div>
 </div>
 <div>
     <img src="https://img.shields.io/badge/amazonec2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white">
