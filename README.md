@@ -16,7 +16,7 @@
 <br>
 
 ## 배포 주소
-- (주소 추가)
+- <http://elice-build.s3-website.ap-northeast-2.amazonaws.com/>
 <br>
 
 ## 사용 방법
