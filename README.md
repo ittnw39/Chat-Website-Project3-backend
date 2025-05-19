@@ -61,12 +61,14 @@ Discord와 유사한 실시간 음성/영상 통화 및 채팅 기능을 제공�
 
 ## 📁 프로젝트 구조 (주요 경로)
 
-\'\'\'
+```text
 .
 ├── src/main/java/com/elice/spatz/
 │   ├── SpatzApplication.java  # Spring Boot 메인 애플리케이션
-│   ├── config/                # 애플리케이션 설정 (보안, AWS, WebSocket 등)
-│   │   └── SpatzApplication.java # Spring Boot 메인 애플리케이션
+│   ├── config/                # 애플리케이션 설정
+│   │   ├── SecurityConfig.java  # Spring Security 설정
+│   │   ├── S3Config.java        # AWS S3 연동 설정
+│   │   └── ...                  # 기타 설정 파일들
 │   ├── domain/
 │   │   ├── chat/              # 채팅 관련 (Controller, Service, Entity, DTO 등)
 │   │   │   ├── entity/
@@ -83,7 +85,7 @@ Discord와 유사한 실시간 음성/영상 통화 및 채팅 기능을 제공�
 ├── build.gradle               # 프로젝트 빌드 및 의존성 관리
 ├── Dockerfile                 # Docker 이미지 빌드 설정
 └── ...
-\'\'\'
+```
 
 ## 🚀 시작하기
 
